@@ -1,0 +1,134 @@
+#!/bin/bash
+#
+# Author: jseg380
+# File: ~/.local/bin/percentage
+#
+
+###############################################################################
+# Functions
+
+function divide() {
+  if [ $# -eq 2 ]; then
+    # Format: float with 2 decimals filled with 0 in case they are "empty"
+    solution=$(python -c "a='{:05.2f}'.format($1/$2); print(f'{a}')")
+
+    echo "$solution"
+  elif [ $# -eq 3 ] && [ $3 == "-i" ]; then
+    # Format: integer
+    solution=$(python -c "print(f'{int($1//$2)}')")
+
+    echo "$solution"
+  fi
+}
+
+###############################################################################
+# Program
+
+# Show help
+if [ $# -eq 1 ] && ([ "$1" == "-h" ] || [ "$1" == "--help" ]); then
+  echo
+  echo "Usage:"
+  echo "percentage <number> [option] <values>"
+  echo
+  echo "Prints one of the given values depending of the number passed."
+  echo "The values are assigned proportionally, e.g. if arguments are:"
+  echo "'30 one two three' then 'one' will be returned because it's in"
+  echo "the first range of [0, 33] [33, 66] [66, 100]"
+  echo
+  echo " <number> is a positive integer in range [0, 100]"
+  echo
+  echo "Option:"
+  echo " --repeat if present two other parameters are needed:"
+  echo "           value that will be repeated to represent the % over the max"
+  echo "           an integer that represents the max"
+  echo
+  echo "Valid values:"
+  echo " value1 value2 ...  values are given as parameters"
+  echo " file               values are written inside a file"
+  echo
+  echo "File format: Values must be in the same line separated by spaces ' '"
+  exit 0
+fi
+
+# Incorrect amount of arguments
+if [ $# -lt 2 ]; then
+  echo "Error. At least 2 arguments were expected."
+  echo "Try 'percentage --help' for more information."
+  exit 1
+fi
+
+# Format the 1st argument to remove any % characters
+if [[ "$1" == *% ]]; then
+  number=${1::-1}
+else
+  number=$1
+fi
+
+# Wrong number
+#if [ $number -lt 0 ] || [ $number -gt 100 ]; then
+# Allows number > 100 for supporting volume over 100%
+if [ $number -lt 0 ]; then
+  echo "Error. 1st argument must be a positive integer in range [0, 100]"
+  echo "Try 'percentage --help' for more information."
+  exit 1 
+fi
+
+# In both modes when the number is 0 nothing is printed
+if [ $number -eq 0 ]; then
+  echo -n ""
+  exit 0
+fi
+
+
+# "Repeat" mode
+if [ $# -eq 4 ] && [ "$2" == "--repeat" ]; then
+  value=$3
+  max=$4
+
+  times=$(python -c "print(f'{min(int($number / 100 * $max)+1, $max)}')")
+
+  for ((i = 0; i < $times; i++))
+  do
+    echo -n "$value"
+  done
+
+  exit 0
+fi
+
+
+# "Normal" mode
+# Declarations
+declare -a values
+
+# Arguments passed in a file
+if [ $# -eq 2 ]; then
+  if !(test -e $2); then
+    echo "Error. File $2 doesn't exist."
+    echo "Try 'percentage --help' for more information."
+    exit 2
+  elif !(test -r $2); then
+    echo "Error. Read acces to $2 denied."
+    echo "Try 'percentage --help' for more information."
+    exit 2
+  fi
+
+  read -r -a values < $2
+else
+  declare -a arguments=("$@") # Doesn't include program's name
+  for ((i = 1; i < $#; i=i+1))
+  do
+    values+=("${arguments[i]}")
+  done
+fi
+
+
+# If value is 100, it's in the last interval
+if [ $number -ge 100 ]; then
+  echo -n "${values[-1]}"
+else
+  # Calculate interval to which the number belongs
+  interval_size=$(divide 100 ${#values[@]})
+  interval=$(divide $number $interval_size -i)
+
+  echo -n "${values[$interval]}"
+fi

@@ -1,0 +1,53 @@
+# Screens
+hdmi=`xrandr | grep ' connected' | grep 'HDMI' | awk '{print $1}'`
+
+if [ "$hdmi" = "HDMI-1" ]; then
+  xrandr --output eDP-1 --primary --mode 1920x1080 --pos 0x0 --rotate normal --output HDMI-1 --mode 1920x1080 --pos 1920x0 --rotate normal --output DP-1 --off --output DP-2 --off &
+else
+  xrandr --output eDP-1 --primary --mode 1920x1080 --pos 0x0 --rotate normal --output HDMI-1 --off --output DP-1 --off &
+fi
+
+# Multi monitor setup
+# xrandr --output eDP-1 --primary --mode 1920x1080 --pos 0x0 --rotate normal --output HDMI-1 --mode 1920x1080 --pos 1920x0 --rotate normal --output DP-1 --off --output DP-2 --off
+
+# Keyboard layout
+setxkbmap es &
+
+# Network
+# nm-applet &
+
+# Do not automount devices
+udiskie -t -A &
+
+# Volume icon
+volumeicon &
+
+# Battery icon
+cbatticon -u 5 -o 20 &
+
+# Compositor
+picom &
+
+# Mouse configuration
+xinput --set-prop 'Logitech Wireless Mouse' 'Coordinate Transformation Matrix' 0.43 0 0 0 0.43 0 0 0 1
+
+# Touchpad configuration
+xinput --set-prop 'PNP0C50:0e 06CB:7E7E Touchpad' 'libinput Tapping Enabled' 1
+xinput --set-prop 'PNP0C50:0e 06CB:7E7E Touchpad' 'libinput Natural Scrolling Enabled' 1
+xinput --set-prop 'PNP0C50:0e 06CB:7E7E Touchpad' 'Coordinate Transformation Matrix' 0.75 0 0 0 0.75 0 0 0 1
+
+# Wallpaper
+~/.config/wallpaper/fehbg &
+
+# Safe Eyes
+~/.config/safeeyes/script-safeeyes.sh &
+
+# Uptime session
+echo $(date +"%s") > /tmp/start_session.tmp
+
+# Polkit (to let programs run sudo commands)
+# https://wiki.archlinux.org/title/Polkit#Authentication_agents
+lxpolkit &
+
+# To clean dotfiles pollution (.xsession-errors) (Not working)
+ERRFILE="$XDG_CACHE_HOME/X11/xsession-errors"

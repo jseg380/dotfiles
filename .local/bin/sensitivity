@@ -1,0 +1,47 @@
+#!/bin/bash
+#
+# Author: jseg380
+# File: ~/.local/bin/sensitivity
+#
+
+###############################################################################
+# Declarations
+
+default_config="0.43 0 0 0 0.43 0 0 0 1"
+reset_config="1 0 0 0 1 0 0 0 1"
+
+###############################################################################
+# Program
+
+# Show help
+if [ $# == 1 ] && ([ $1 == '-h' ] || [ $1 == "--help" ]); then
+  echo "Available options:"
+  echo " -d, --default   sets sensitivity to default configuration"
+  echo " -r, --reset   sets sensitivity to 1.0"
+  exit 0
+fi
+
+# Default behaviour
+if [ $# == 0 ] || ([ $# == 1 ] && ([ $1 == "-d" ] || [ $1 == "--default" ])); then
+  xinput --set-prop 'Logitech Wireless Mouse' \
+  'Coordinate Transformation Matrix' $default_config
+
+  echo "Sensitivity set to: $default_config"
+elif [ $# == 1 ] && ([ $1 == "-r" ] || [ $1 == "--reset" ]); then
+  xinput --set-prop 'Logitech Wireless Mouse' \
+  'Coordinate Transformation Matrix' $reset_config
+
+  echo "Sensitivity set to: $reset_config"
+elif [ $# == 1 ]; then
+  # Name of the program
+  re="([^/\d]+)[^/]*$"
+  [[ $0 =~ $re ]]
+  name=${BASH_REMATCH[1]}
+
+  echo "Error. Unrecognized option: '$1'"
+  echo "Try '$name --help' for more information."
+
+  exit 1
+fi
+
+exit 0

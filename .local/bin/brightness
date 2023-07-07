@@ -1,0 +1,86 @@
+#!/bin/bash
+#
+# Author: jseg380
+# File: ~/.local/bin/brightness
+#
+
+###############################################################################
+# Functions
+
+function show_brightness() {
+  file_id="/tmp/bright_id"
+  last_id=$(cat $file_id 2> /dev/null)
+  icon="/usr/share/icons/Custom-icons/brightness.svg"
+  declare -i br=$(( $(brightnessctl get) * 100 / 255 ))
+
+  echo "$(percentage $br        ) $br% "
+
+  re='^[0-9]+$'
+  if ! [[ $last_id =~ $re ]]; then
+    notify-send -t 3000 -i $icon --transient --print-id \
+      "Brightness - $br%" "$(percentage $br --repeat 󰹞 30)" > $file_id
+  else
+    notify-send -t 3000 -i $icon --transient --print-id --replace-id=$last_id \
+      "Brightness - $br%" "$(percentage $br --repeat 󰹞 30)" > $file_id
+  fi
+}
+
+###############################################################################
+# Program
+
+# Show help
+if [ $# == 1 ] && ([ "$1" == "-h" ] || [ "$1" == "--help" ]); then
+  echo
+  echo "Usage:"
+  echo " brightness [options]"
+  echo
+  echo "Modify or show laptop's brightness."
+  echo
+  echo "Options:"
+  echo " -s, --simple  shows brightness as an integer in range [0, 100]"
+  echo " <number>      sets brightness to <number>"
+  echo
+  echo "Valid number formats:"
+  echo " n, n%     sets brightness to n"
+  echo " +n%       increases brightness to (current + n)%"
+  echo " -n%, n%-  decreases brightness to (current - n)%"
+  echo " n must be an integer in range [0, 100]"
+  echo
+  echo "If no option is given the program will show the current brightness"
+  echo "with an icon which is representative to the relative brightness"
+  exit 0
+fi
+
+# Default behaviour
+if [ $# == 0 ] ; then
+  show_brightness
+fi
+
+
+if [ $# == 1 ]; then
+  if [ $1 == "-s" ] || [ $1 == "--simple" ]; then
+    br=$(( $(brightnessctl get) * 100 / 255 ))
+
+    echo "$br"
+  elif [ "$1" == "-n" ] || [ "$1" == "--notification" ]; then
+    show_brightness
+  elif [[ $1 == +*% ]] || [[ $1 ==  *%- ]]; then
+    brightnessctl set $1 > /dev/null
+
+    show_brightness
+  elif [[ $1 == -*% ]]; then
+    br="$1"
+    br="${1:1}"
+    brightnessctl set "$br-"> /dev/null
+
+    show_brightness
+  elif [[ $1 == *% ]]; then
+    brightnessctl set $1 > /dev/null
+
+    show_brightness
+  else
+    brightnessctl set "$1%" > /dev/null
+
+    show_brightness
+  fi
+fi

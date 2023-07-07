@@ -1,0 +1,124 @@
+#!/bin/bash
+#
+# Author: jseg380
+# File: ~/.local/bin/set-monitor
+#
+
+################################################################################
+# Variable declarations
+
+directionArray=("up" "right" "down" "left")
+posArray=("0x-1080" "1920x0" "0x1080" "-1920x0")
+upArray=("up" "u" "north" "n")
+downArray=("down" "d" "south" "s")
+rightArray=("right" "r" "east" "e")
+leftArray=("left" "l" "west" "w")
+
+programName=$0
+default=1
+
+error_code=10
+
+################################################################################
+# Functions
+
+function info_program() {
+    echo "Use: $programName <position>"
+    echo "<position> is an optional argument which indicates the position of" \
+         "the second screen relative to the main screen. If <position>" \
+         "argument is skipped then it will use the default" \
+         "(${posArray[$default]})" ; echo
+    echo "Valid values (both lower and upper case valid): "
+    echo "Up    : ${upArray[*]^}"
+    echo "Down  : ${downArray[*]^}"
+    echo "Right : ${rightArray[*]^}"
+    echo "Left  : ${leftArray[*]^}"
+}
+
+function set_monitor() {
+    hdmi=`xrandr | grep ' connected' | grep 'HDMI' | awk '{print $1}'`
+    
+    # Set monitor
+    if [ "$hdmi" = "HDMI-1" ]; then
+        echo "Setting new screen ${directionArray[$1]} relative to main screen"
+        xrandr \
+        --output eDP-1 --primary --mode 1920x1080 --pos 0x0 --rotate normal \
+        --output HDMI-1 --mode 1920x1080 --pos ${posArray[$1]} --rotate normal \
+        --output DP-1 --off --output DP-2 --off &
+    else
+        echo "Only the main screen was detected."
+        xrandr \
+        --output eDP-1 --primary --mode 1920x1080 --pos 0x0 --rotate normal \
+        --output HDMI-1 --off --output DP-1 --off &
+    fi
+    
+    # Reload qtile
+    qtile cmd-obj -o cmd -f restart
+    
+    # Set wallpaper
+    $XDG_CONFIG_HOME/wallpaper/fehbg
+    
+    exit 0
+}
+
+################################################################################
+# Argument check
+
+if [ $# -gt 1 ]; then
+    echo "Error. Too many arguments. This program takes as much as 1 argument."
+    echo "For help use: $0 -h"
+    exit 1
+fi
+
+if [ $# -eq 1 ] && ([ "$1" == "-h" ] || [ "$1" == "--help" ]); then
+    info_program
+    exit 0
+fi
+
+if [ $# -eq 0 ]; then
+    set_monitor $default
+fi
+
+# Argument verification
+# If the program has reached this point, then there is exactly one argument
+option="${1,,}"
+
+~/.local/bin/c_program/get_direction $option
+declare -i direction=$?
+
+if [[ $direction -eq $error_code ]]; then
+    echo "Argument $1 is not a valid value."
+    echo "For help use: $0 -h"
+    exit 3
+fi
+
+set_monitor $direction
+
+################################################################################
+
+# NOT WORKING AS DESIRED, IF POSSIBLE IT WOULD BE BETTER TO IMPLEMENT THE 
+# WHOLE PROGRAM IN BASH WITHOUT MAKING USE OF EXTERNAL PROGRAMS
+#if [[ "${upArray[@]}" =~ $option ]]; then
+#    echo "${directionArray[0]^}"
+#    exit 0
+#    set_monitor 0
+#elif [[ "${rightArray[@]}" =~ $option ]]; then
+#    echo "${directionArray[1]^}"
+#    exit 0
+#    set_monitor 1
+#elif [[ "${downArray[@]}" =~ $option ]]; then
+#    echo "${directionArray[2]^}"
+#    exit 0
+#    set_monitor 2
+#elif [[ "${leftArray[@]}" =~ $option ]]; then
+#    echo "${directionArray[3]^}"
+#    exit 0
+#    set_monitor 3
+#else
+#    echo "Argument $1 is not a valid value."
+#    echo "For help use: $0 -h"
+#    exit 3
+#fi
+
+
+

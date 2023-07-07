@@ -1,0 +1,62 @@
+#!/bin/bash
+#
+# Author: jseg380
+# File: ~/.local/bin/volume
+#
+
+###############################################################################
+# Declarations
+
+vol=$(pamixer --get-volume)
+file_id="/tmp/vol_id"
+last_id=$(cat $file_id 2> /dev/null)
+
+###############################################################################
+# Program
+
+if [ $# -eq 1 ] && ([ "$1" == "-s" ] || [ "$1" == "--simple" ]); then
+  echo "$vol"
+  exit 0
+fi
+
+if [ $# -eq 1 ] && ([ "$1" == "-t" ] || [ "$1" == "--toggle-mute" ]); then
+  pamixer --toggle-mute
+elif [ $# -eq 1 ] && [[ $1 == +*% ]]; then
+  volume=${1:1}
+  volume=${volume::-1}
+
+  pamixer --increase $volume
+elif [ $# -eq 1 ] && [[ $1 == -*% ]]; then
+  volume=${1:1}
+  volume=${volume::-1}
+
+  pamixer --decrease $volume
+elif [ $# -eq 1 ] && [[ $1 == *% ]]; then
+  volume=${1::-1}
+
+  pamixer --allow-boost --set-volume $volume
+elif [ $# -eq 1 ]; then
+  pamixer --allow-boost --set-volume $1
+fi
+
+
+vol=$(pamixer --get-volume)
+DIR="$HOME/.local/bin"
+
+declare icon=""
+if [[ `pamixer --get-mute` == "true" ]]; then
+  echo -n "ﱝ $vol% "
+  icon="/usr/share/icons/Custom-icons/vol_mute.svg"
+else
+  echo -n "$($DIR/percentage $vol   奔 墳  ) $vol% "
+  icon="/usr/share/icons/Custom-icons/vol.svg"
+fi
+
+re='^[0-9]+$'
+if ! [[ $last_id =~ $re ]]; then
+  notify-send -t 3000 -i $icon --transient --print-id \
+    "Volume - $vol%" "$($DIR/percentage $vol --repeat 󰹞 30)" > $file_id
+else
+  notify-send -t 3000 -i $icon --transient --print-id --replace-id=$last_id \
+    "Volume - $vol%" "$($DIR/percentage $vol --repeat 󰹞 30)" > $file_id
+fi
