@@ -9,8 +9,6 @@ this feels more like a fork
 of his dotfiles rather than my own dotfiles. See his dotfiles here:  
 `https://github.com/antoniosarosi/dotfiles`
 
-Besides the dotfiles I also uploaded some themes and wallpapers  
-([also Sarosi's](https://github.com/antoniosarosi/Wallpapers))
 
 ## Installation
 
