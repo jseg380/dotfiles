@@ -8,6 +8,7 @@ alias grep="grep --color=auto"
 alias ls="ls --color=auto" 
 alias wget="wget --hsts-file='$XDG_DATA_HOME/wget-hsts'"
 alias bat="bat --plain --no-paging"
+alias new-project="npm init -y && printf \"**/node_modules\ndist/*\n\" > .gitignore"
 
 # Prompt: Starship
 starship init fish | source
