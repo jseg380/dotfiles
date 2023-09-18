@@ -14,7 +14,6 @@ dirs=(
   "$conf/bat"
   "$conf/cava"
   "$conf/fish"
-  "$conf/htop"
   "$conf/kitty"
   "$conf/nvim"
   "$conf/ranger"

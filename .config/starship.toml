@@ -28,8 +28,9 @@ truncation_symbol = "…/"
 [directory.substitutions]
 "Documents" = " "
 "Downloads" = " "
-"Music" = " "
+"Music" = "󰝚 "
 "Pictures" = " "
+"Universidad" = " "
 
 # Git
 [git_branch]

@@ -99,6 +99,9 @@ lvim.plugins = {
     name = "catppuccin"
   },
   -- {
+  --   "dense-analysis/ale",
+  -- },
+  -- {
   --   "folke/trouble.nvim",
   --   cmd = "TroubleToggle",
   -- },
@@ -137,9 +140,10 @@ lvim.plugins = {
 -- Relative line numbers
 vim.opt.relativenumber = true
 
--- Show documentation of a function
--- lvim.lsp.buffer_mappings.normal_mode['H'] = {vim.lsp.buf.hover, "Show documentation"}
+-- Ruler at character 80th
+vim.opt.colorcolumn = "80"
 
+-- TODO: Make it work
 -- Sets colors to line numbers Above, Current and Below  in this order
 -- function LineNumberColors()
 --   vim.api.nvim_set_hl(0, 'LineNrAbove', { fg = '#51B3EC', bold = true })
@@ -147,6 +151,6 @@ vim.opt.relativenumber = true
 --   vim.api.nvim_set_hl(0, 'LineNrBelow', { fg = '#FB508F', bold = true })
 -- end
 
-vim.api.nvim_set_hl(0, 'CursorLineNrAbove', { fg = '#FFFFFF', bold = true })
-vim.api.nvim_set_hl(0, 'CursorLineNr', { fg = 'white', bold = true })
-vim.api.nvim_set_hl(0, 'CursorLineNrBelow', { fg = '#FFFFFF', bold = true })
+-- vim.api.nvim_set_hl(0, 'CursorLineNrAbove', { fg = '#FFFFFF', bold = true })
+-- vim.api.nvim_set_hl(0, 'CursorLineNr', { fg = 'white', bold = true })
+-- vim.api.nvim_set_hl(0, 'CursorLineNrBelow', { fg = '#FFFFFF', bold = true })
