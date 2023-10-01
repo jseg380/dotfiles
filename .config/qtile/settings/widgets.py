@@ -37,7 +37,7 @@ def powerline(fg="light", bg="dark"):
 
 def workspaces(): 
     return [
-        separator(),
+        # separator(),
         widget.GroupBox(
             **base(fg='light'),
             font='JetBrainsMono Nerd Font',
@@ -94,7 +94,7 @@ primary_widgets = [
     widget.Backlight(
         background=colors['color4'],
         foreground=colors['text'],
-        backlight_name='amdgpu_bl0',
+        backlight_name='amdgpu_bl1',
         change_command='brightness {0}',
         update_interval=10,            # 0.2s default value
     ),
