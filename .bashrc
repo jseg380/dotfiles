@@ -26,25 +26,13 @@ MYSQL_HISTFILE="$XDG_DATA_HOME/mysql_history"
 ERRFILE="$XDG_CACHE_HOME/X11/xsession-errors"
 NPM_CONFIG_USERCONFIG="$XDG_CONFIG_HOME/npm/npmrc"
 
+
 # Custom prompt
-# Colors
-user="\[$(tput setaf 171)\]"
-host="\[$(tput setaf 141)\]"
-dir="\[$(tput setaf 51)\]"
-reset="\[$(tput sgr0)\]"
-
-exitstatus()
-{
-  last=$?
+custom_prompt() {
+  # Colors
+  host="$(tput setaf 10)"
+  dir="$(tput setaf 4)"
   reset="$(tput sgr0)"
-  if [[ $last -eq 0 ]]
-  then
-    color="$(tput setaf 2)"
-  else
-    color="$(tput setaf 1)"
-  fi
-
- echo -n "$color[$last]$reset"
+  PS1="\\[$host\\]\\h:\\[$dir\\]\\w\\[$reset\\]\\\$ "
 }
-
-PS1="${user}\u${reset}@${host}\h${reset} ${dir}\w${reset} \$(exitstatus)> "
+custom_prompt
