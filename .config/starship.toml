@@ -1,28 +1,37 @@
 # Sets user-defined palette
 palette = "catppuccin_mocha"
 
+# Format {{{
 format = """
-[](fg:teal)\
+[](fg:peach)\
 $username\
-[](bg:red fg:teal)\
+[](bg:pink fg:peach)\
 $directory\
-[ ](fg:red)\
+[ ](fg:pink)\
 $git_branch\
 $git_status
 """
+# }}}
 
+# Username {{{
 # You can also replace your username with a neat symbol like  to save some space
 [username]
 show_always = true
-style_user = "bg:teal fg:mantle"
+style_user = "bg:peach fg:crust"
 format = "[ $user ]($style)"
+# }}}
 
+
+# Directory {{{
 [directory]
-style = "bg:red fg:mantle"
+style = "bg:pink fg:crust"
 format = "[ $path ]($style)"
 truncation_length = 3
 truncation_symbol = "…/"
+# }}}
 
+
+# Substitutions {{{
 # Here is how you can shorten some long paths by text replacement
 # similar to mapped_locations in Oh My Posh:
 [directory.substitutions]
@@ -31,25 +40,31 @@ truncation_symbol = "…/"
 "Music" = "󰝚 "
 "Pictures" = " "
 "Universidad" = " "
+# }}}
 
-# Git
+
+# Git {{{
 [git_branch]
 symbol = " "
-style = "bg:lavender fg:mantle"
-format = "\b\b[](fg:red bg:lavender)[  $symbol $branch ]($style)"
+style = "bg:sapphire fg:crust"
+format = "\b\b[](fg:pink bg:sapphire)[  $symbol $branch ]($style)"
 
 [git_status]
-style = "bg:lavender fg:mantle"
-format = "[$all_status$ahead_behind]($style)[ ](fg:lavender)"
+style = "bg:sapphire fg:crust"
+format = "[$all_status$ahead_behind]($style)[ ](fg:sapphire)"
+# }}}
 
-# Time
+
+# Time {{{
 [time]
 disabled = true
 time_format = "%R" # Hour:Minute Format
 style = "bg:#33658A fg:#FFFFFF"
 format = "[ ♥ $time ]($style)"
+# }}}
 
-# Languages
+
+# Languages {{{
 [c]
 symbol = " "
 style = "bg:#86BBD8 fg:#FFFFFF"
@@ -109,9 +124,10 @@ format = "[ $symbol ($version) ]($style)"
 symbol = " "
 style = "bg:#86BBD8 fg:#FFFFFF"
 format = "[ $symbol ($version) ]($style)"
+# }}}
 
 
-# Catppuccin palettes
+# Catppuccin palettes {{{
 # palette tables should be last in the config ⚓️
 [palettes.catppuccin_macchiato]
 rosewater = "#f4dbd6"
@@ -224,3 +240,4 @@ surface0 = "#313244"
 base = "#1e1e2e"
 mantle = "#181825"
 crust = "#11111b"
+# }}}

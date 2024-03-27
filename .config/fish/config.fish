@@ -2,13 +2,16 @@
 set -g fish_greeting
 
 # Aliases
-# alias a="clear"  # Does not clear scrollback buffer in kitty
-alias a="printf '\033[2J\033[3J\033[1;1H'"
+alias clear="printf '\033[2J\033[3J\033[1;1H'"
+alias a="clear"
 alias grep="grep --color=auto"
 alias ls="ls --color=auto" 
 alias wget="wget --hsts-file='$XDG_DATA_HOME/wget-hsts'"
 alias bat="bat --plain --no-paging"
 alias new-project="npm init -y && printf \"**/node_modules\ndist/*\n\" > .gitignore"
+# [ "$TERM" = "xterm-kitty" ] && alias ssh="kitty +kitten ssh"
+alias ssh="TERM=xterm-256color command ssh"
+alias vagrant-ssh="TERM=xterm-256color vagrant ssh"
 
 # Prompt: Starship
 starship init fish | source

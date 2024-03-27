@@ -1,10 +1,11 @@
-# Theming for Qtile
+# Qtile theme
 
 from os import path
-import subprocess
 import json
 
-from .path import qtile_path
+from .keys import home_env 
+
+qtile_path = path.join(home_env, ".config", "qtile")
 
 
 def load_theme():

@@ -2,7 +2,14 @@
 
 from libqtile.config import Key
 from libqtile.command import lazy
+from os import getenv
+from os.path import join as p_join
+from getpass import getuser
 
+# Paths
+home_env = getenv("HOME", f"/home/{getuser()}")
+local_bin = p_join(home_env, ".local/bin")
+rofi_path = p_join(home_env, ".config/rofi")
 
 mod = "mod4"
 
@@ -15,7 +22,7 @@ keys = [Key(key[0], key[1], *key[2:]) for key in [
     ([mod], "h", lazy.layout.left()),
     ([mod], "l", lazy.layout.right()),
 
-    # Change window sizes (MonadTall)
+    # Change window sizes
     ([mod, "shift"], "l", lazy.layout.grow()),
     ([mod, "shift"], "h", lazy.layout.shrink()),
 
@@ -45,16 +52,11 @@ keys = [Key(key[0], key[1], *key[2:]) for key in [
 
     # ------------ App Configs ------------
 
-    # STOCK rofi
-    # Menu
-    #([mod], "m", lazy.spawn("rofi -show drun")),
+    # Rofi application menu
+    ([mod], "m", lazy.spawn(p_join(rofi_path, "launchers/rofi.sh 1 5"))),
 
-    # CUSTOM rofi
-    # Menu
-    ([mod], "m", lazy.spawn("/home/juanma/.config/rofi/launchers/rofi.sh 1 5")),
-
-    # Shutdown menu
-    ([mod, "shift"], "m", lazy.spawn("/home/juanma/.config/rofi/powermenu/type-1/powermenu.sh")),
+    # Rofi power management menu
+    ([mod, "shift"], "m", lazy.spawn(p_join(rofi_path, "powermenu/type-1/powermenu.sh"))),
 
     # Browsers
     ([mod], "b", lazy.spawn("firefox")),
@@ -66,42 +68,20 @@ keys = [Key(key[0], key[1], *key[2:]) for key in [
     # Terminal
     ([mod], "Return", lazy.spawn("kitty")),
 
-    # Visual Studio Code
-    ([mod], "v", lazy.spawn("code")),
-
-    # Screenshot (Core shot)
-    #([mod], "s", lazy.spawn("coreshot")),
+    # Screenshot (CoreShot)
     ([mod, "shift"], "s", lazy.spawn("coreshot -s")),
 
     # ------------ Hardware Configs ------------
 
-    # CHANGE TO MAKE USE NOTIFICATION (both volume and brightness)
     # Volume
-    #([], "XF86AudioLowerVolume", lazy.spawn(
-    #    "pactl set-sink-volume @DEFAULT_SINK@ -5%"
-    #)),
-    ([], "XF86AudioLowerVolume", lazy.spawn(
-        "/home/juanma/.local/bin/volume -5%"
-    )),
-    #([], "XF86AudioRaiseVolume", lazy.spawn(
-    #    "pactl set-sink-volume @DEFAULT_SINK@ +5%"
-    #)),
-    ([], "XF86AudioRaiseVolume", lazy.spawn(
-        "/home/juanma/.local/bin/volume +5%"
-    )),
-    #([], "XF86AudioMute", lazy.spawn(
-    #    "pactl set-sink-mute @DEFAULT_SINK@ toggle"
-    #)),
-    ([], "XF86AudioMute", lazy.spawn(
-        "/home/juanma/.local/bin/volume --toggle-mute"
-        )),
+    ([], "XF86AudioLowerVolume", lazy.spawn(p_join(local_bin, "volume -5%"))),
+    ([], "XF86AudioRaiseVolume", lazy.spawn(p_join(local_bin, "volume +5%"))),
+    ([], "XF86AudioMute", lazy.spawn(p_join(local_bin, "volume --toggle-mute"))),
 
     # Brightness
     # Bugs: duplicated or triplicated keystrokes when pressed once
-    ([], "XF86MonBrightnessUp", lazy.spawn("brightnessctl set +5%")),
-    ([], "XF86MonBrightnessDown", lazy.spawn("brightnessctl set 5%-")),
-    #([], "XF86MonBrightnessUp", 
-    #    lazy.spawn("/home/juanma/.local/bin/brightness +5% ")),
-    #([], "XF86MonBrightnessDown", 
-    #    lazy.spawn("/home/juanma/.local/bin/brightness -5% ")),
+    # ([], "XF86MonBrightnessUp", lazy.spawn(p_join(local_bin, "brightness +5% "))),
+    # ([], "XF86MonBrightnessDown", lazy.spawn(p_join(local_bin, "brightness -5% "))),
+    ([], "XF86MonBrightnessUp", lazy.spawn("brightnessctl +5%")),
+    ([], "XF86MonBrightnessDown", lazy.spawn("brightnessctl -5%")),
 ]]

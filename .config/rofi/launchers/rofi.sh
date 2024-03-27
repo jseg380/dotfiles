@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# There's a lot of room for improvement (a lot)
+# There's room for improvement
 
 ################################################################################
 # DECLARATIONS
@@ -63,7 +63,7 @@ function verify_args() {
 
 # Number of arguments verification
 
-if [ $# \> 3 ]; then
+if [ $# -gt 3 ]; then
   echo "Error. This program takes at most 3 arguments, but $# were received."
   echo "Try '$name --help' for more information."
   exit 1
@@ -72,14 +72,14 @@ fi
 
 # Show help
 
-if [ $# == 1 ] && ([ $1 == "--help" ] || [ $1 == "-h" ]); then
+if [ $# -eq 1 ] && ([ "$1" == "--help" ] || [ "$1" == "-h" ]); then
   echo "This program launches rofi with a custom theme."
   echo "Use:"
   echo "$name [--set] [type] [style]"
-  echo "  --set    is used to change the saved values"
-  echo "   type    must be an integer in [1, 7]"
-  echo "  style    must be a positive integer in [1, max], where max value will"
-  echo "           depend on the type chosen."
+  echo "   --set    is used to change the saved values"
+  echo "  [type]    must be an integer in [1, 7]"
+  echo " [style]    must be a positive integer in [1, max], where max value will"
+  echo "            depend on the type chosen."
   echo
   echo "To see the available list of types use '$name \$style --values'"
   exit 0
@@ -88,25 +88,25 @@ fi
 
 # Program itself
 
-if [ $# == 3 ] && [ $1 == "--set" ]; then   # Setting new saved values
+if [ $# -eq 3 ] && [ "$1" == "--set" ]; then   # Setting new saved values
   verify_args $2 $3
   echo -e "$2\n$3" > $conf_file
   exit 0
-elif [ $# == 3 ]; then
+elif [ $# -eq 3 ]; then
   echo "Error. Option '$1' unrecognized."
   echo "Try '$name --help' for more information."
   exit 1
-elif [ $# == 2 ]; then     # Running program once with different type and style
+elif [ $# -eq 2 ]; then     # Running program once with different type and style
   verify_args $1 $2
   
-  if [ $2 == "--values" ]; then
+  if [ "$2" == "--values" ]; then
     echo "Type $1 has ${styles[$(($1 - 1))]} possible styles."
     exit 0
   else
-    type=$1
-    style=$2
+    type="$1"
+    style="$2"
   fi
-elif [ $# == 1 ]; then
+elif [ $# -eq 1 ]; then
   echo "Error. Option '$1' unrecognized."
   echo "Try '$name --help' for more information."
   exit 1

@@ -5,7 +5,15 @@
 -- vim options
 vim.opt.shiftwidth = 0
 vim.opt.tabstop = 2
-vim.opt.relativenumber = true
+vim.opt.relativenumber = true -- Relative line numbers
+vim.opt.colorcolumn = "80"    -- Ruler at character 80th
+vim.opt.termguicolors = true
+vim.opt.clipboard = "unnamedplus"
+
+-- To disable error messages
+-- vim.lsp.handlers["textDocument/publishDiagnostics"] = function()
+-- end
+
 
 -- general
 lvim.log.level = "info"
@@ -14,6 +22,10 @@ lvim.format_on_save = {
   pattern = "*.lua",
   timeout = 1000,
 }
+
+-- -- Change theme settings
+-- lvim.colorscheme = "lunar"
+
 -- to disable icons and use a minimalist setup, uncomment the following
 -- lvim.use_icons = false
 
@@ -28,9 +40,6 @@ lvim.keys.normal_mode["<C-s>"] = ":w<cr>"
 -- -- Use which-key to add extra bindings with the leader-key prefix
 -- lvim.builtin.which_key.mappings["W"] = { "<cmd>noautocmd w<cr>", "Save without formatting" }
 -- lvim.builtin.which_key.mappings["P"] = { "<cmd>Telescope projects<CR>", "Projects" }
-
--- -- Change theme settings
--- lvim.colorscheme = "lunar"
 
 lvim.builtin.alpha.active = true
 lvim.builtin.alpha.mode = "dashboard"
@@ -101,10 +110,10 @@ lvim.plugins = {
   -- {
   --   "dense-analysis/ale",
   -- },
-  -- {
-  --   "folke/trouble.nvim",
-  --   cmd = "TroubleToggle",
-  -- },
+  {
+    "folke/trouble.nvim",
+    cmd = "TroubleToggle",
+  },
 }
 
 -- -- Autocommands (`:help autocmd`) <https://neovim.io/doc/user/autocmd.html>
@@ -116,32 +125,6 @@ lvim.plugins = {
 --   end,
 -- })
 
-
--- ############################################################################
---
---                               ADDED BY USER
---
--- ############################################################################
-
-
--- Config extracted from https://github.com/neovim/nvim-lspconfig/issues/662
--- vim.lsp.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(
---  vim.lsp.diagnostic.on_publish_diagnostics, {
---    virtual_text = false
---  }
---)
-
--- To disable error messages
--- vim.lsp.handlers["textDocument/publishDiagnostics"] = function()
--- end
-
--- vim.diagnostic.config({signs = false})
-
--- Relative line numbers
-vim.opt.relativenumber = true
-
--- Ruler at character 80th
-vim.opt.colorcolumn = "80"
 
 -- TODO: Make it work
 -- Sets colors to line numbers Above, Current and Below  in this order

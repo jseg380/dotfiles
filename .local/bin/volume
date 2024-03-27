@@ -52,6 +52,11 @@ else
   icon="/usr/share/icons/Custom-icons/vol.svg"
 fi
 
+# Use `stat -c%Y <file>` to get the last modification time of a file in seconds
+# since the EPOCH. If it has been more than X seconds, then it's not necessary
+# to replace the notification because it "should have gone by then" (maybe
+# if you hover the mouse over the notification it stays on the screen for 
+# longer than it should, i.e. the expiration time)
 re='^[0-9]+$'
 if ! [[ $last_id =~ $re ]]; then
   notify-send -t 3000 -i $icon --transient --print-id \
