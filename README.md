@@ -29,6 +29,7 @@ The config files are for the following programs:
   
   
 <br>
+  
 > Note:  
 A [nerd font](https://www.nerdfonts.com) is also needed for symbol support. 
 I'm currently using  
