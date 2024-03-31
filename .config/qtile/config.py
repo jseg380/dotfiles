@@ -14,18 +14,20 @@ from subprocess import run as sub_run
 from settings.keys import home_env
 
 
-main = None
-dgroups_key_binder = None
-dgroups_app_rules = []
-follow_mouse_focus = True
+auto_fullscreen = True
 bring_front_click = False
 cursor_warp = True
-auto_fullscreen = True
-focus_on_window_activation = 'urgent'
-wmname = 'LG3D'
-qtile_path = path_join(home_env, ".config", "qtile")
+#dgroups_key_binder = None
+#dgroups_app_rules = []
+#floating_layout = []
+floats_kept_above = True
+focus_on_window_activation = "urgent"
+# follow_mouse_focus = True
+auto_minimize = False
+reconfigure_screens = False
+wmname = "LG3D"     # For Java UI Toolkits to work correctly
 
 
-@hook.subscribe.startup_once
-def autostart():
-    sub_run([path_join(qtile_path, 'autostart.sh')])
+# @hook.subscribe.startup_once
+# def autostart():
+#     pass

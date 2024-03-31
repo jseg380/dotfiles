@@ -1,5 +1,8 @@
 #!/bin/bash
-# 
+#
+# Author: jseg380
+# File: ~/.local/libexec/break.sh
+#
 # Script to take a break after using the computer for 2 hours (not taking
 # into account suspended time)
 #
@@ -10,13 +13,7 @@ limit="2h"
 sleep "$limit"
 
 # Icon
-icon=""
-if [ "$XDG_CONFIG_HOME" == "" ]
-then
-  icon="$HOME/.config/safeeyes/icons/eye-health.svg"
-else
-  icon="$XDG_CONFIG_HOME/safeeyes/icons/eye-health.svg"
-fi
+icon="${XDG_DATA_HOME:-$HOME/.local/share}/icons/safeeyes/eye-health.svg"
 
 # Time limit has been reached
 notify-send -t 0 -i "$icon" \

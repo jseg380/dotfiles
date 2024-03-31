@@ -10,7 +10,7 @@
 function show_brightness() {
   file_id="/tmp/bright_id"
   last_id=$(cat $file_id 2> /dev/null)
-  icon="/usr/share/icons/Custom-icons/brightness.svg"
+  icon="$XDG_DATA_HOME/icons/brightness/brightness.svg"
   declare -i br=$(( $(brightnessctl get) * 100 / 255 ))
 
   echo "$(percentage $br        ) $br% "

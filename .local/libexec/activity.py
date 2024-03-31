@@ -1,3 +1,5 @@
+#!/bin/env python
+
 from datetime import (
     datetime,                           # Getting current time
     time,                               # Getting time from specific format
@@ -15,7 +17,7 @@ import subprocess                       # Running commands in the shell
 home = environ['HOME']
 journal_file = f'{home}/.activity.log'
 log_file = f'/tmp/activity.log'
-icon_path = '/usr/share/icons/Custom-icons/activity.svg'
+icon_path = f'{home}/.local/share/icons/activity/activity.svg'
 tmp_file = '/tmp/tmp_activity'
 
 freq = 10       # By default ask every 10 min
@@ -536,5 +538,3 @@ while True:
                  body=f'You will be asked again in {freq} minutes',
                  icon=icon_path,
                  transient=True).send()
-
-

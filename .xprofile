@@ -1,39 +1,61 @@
 # Screen, wallpaper {{{
   # Screens
-  hdmi=`xrandr | grep ' connected' | grep 'HDMI' | awk '{print $1}'`
+  set-monitor 2> /dev/null || {
+    # Fallback, in case there is a problem with the script
+    s1=$(xrandr | grep -P ' connected .*primary.*' | awk '{print $1}');
+    s2=$(xrandr | grep -P ' connected (?!.*primary.*)' | awk '{print $1}');
+    s1_opts="--mode 1920x1080 --pos 0x0 --rotate normal";
+    s2_opts="--off";
+    
+    [ "$secondary" == "" ] && s2_opts="--mode 1920x1080 --pos 1920x0 --rotate normal";
 
-  if [ "$hdmi" = "HDMI-1" ]; then
-    xrandr --output eDP-1 --primary --mode 1920x1080 --pos 0x0 --rotate normal --output HDMI-1 --mode 1920x1080 --pos 1920x0 --rotate normal --output DP-1 --off --output DP-2 --off &
-  else
-    xrandr --output eDP-1 --primary --mode 1920x1080 --pos 0x0 --rotate normal --output HDMI-1 --off --output DP-1 --off &
-  fi
+    xrandr --output $s1 --primary $s1_opts \
+           --output $s2 $s2_opts;
+  }
 
   # Compositor
   picom &
 
   # Wallpaper
-  ~/.config/wallpaper/fehbg
+  config="${XDG_CONFIG_HOME:-$HOME/.config}"
+  feh --no-fehbg --bg-scale "$config/wallpaper/wallpaper"
 # }}}
 
 
 # Input {{{
   # Keyboard layout
-  setxkbmap es &
+  setxkbmap es
   # To alternate between spanish (es) and english (us) layout by pressing
-  # windows key and space simultaneously
-  # setxkbmap -layout es,us -option grp:win_space_toggle &
+  # <Meta>(Win) and <Space> simultaneously
+  # setxkbmap -layout es,us -option grp:win_space_toggle
 
   # Mouse configuration
-  xinput --set-prop 'Logitech Wireless Mouse' 'Coordinate Transformation Matrix' 0.43 0 0 0 0.43 0 0 0 1
+  if [ "$(xinput --list | grep 'Logitech' | wc -l)" == "1" ]
+  then
+    xinput --set-prop \
+           'Logitech Wireless Mouse' \
+           'Coordinate Transformation Matrix' \
+           0.43 0 0 0 0.43 0 0 0 1
+  fi
 
   # Touchpad configuration
-  xinput --set-prop 'PNP0C50:0e 06CB:7E7E Touchpad' 'libinput Tapping Enabled' 1
-  xinput --set-prop 'PNP0C50:0e 06CB:7E7E Touchpad' 'libinput Natural Scrolling Enabled' 1
-  xinput --set-prop 'PNP0C50:0e 06CB:7E7E Touchpad' 'Coordinate Transformation Matrix' 0.75 0 0 0 0.75 0 0 0 1
+  if [ "$(xinput --list | grep 'Touchpad' | wc -l)" == "1" ]
+  then
+    xinput --set-prop \
+           'PNP0C50:0e 06CB:7E7E Touchpad' \
+           'libinput Tapping Enabled' 1
+    xinput --set-prop \
+           'PNP0C50:0e 06CB:7E7E Touchpad' \
+           'libinput Natural Scrolling Enabled' 1
+    xinput --set-prop \
+           'PNP0C50:0e 06CB:7E7E Touchpad' \
+           'Coordinate Transformation Matrix'\
+           0.75 0 0 0 0.75 0 0 0 1
+  fi
 # }}}
 
 
-# Widgets {{{
+# System tray widgets {{{
   # Disk mounter (do not automount)
   udiskie -t -A &
 
@@ -43,25 +65,22 @@
   # Network
   # nm-applet &
 
-  # Volume icon
+  # Volume
   # volumeicon &
 # }}}
 
 
-# Other {{{
-  # Polkit (to let programs run sudo commands)
-  # https://wiki.archlinux.org/title/Polkit#Authentication_agents
-  lxpolkit &
-
-  # To clean dotfiles pollution (.xsession-errors) (Not working)
-  ERRFILE="$XDG_CACHE_HOME/X11/xsession-errors"
-# }}}
-
-
-# Custom programs {{{
+# Programs {{{
   # Uptime session
   echo $(date +"%s") > /tmp/start_session.tmp
 
   # Safe Eyes
-  ~/.config/safeeyes/script-safeeyes.sh &
+  $HOME/.local/libexec/safeeyes.sh &
+
+  # Break
+  $HOME/.local/libexec/break.sh &
+
+  # Activity
+  # $HOME/.local/libexec/activity.py /dev/null &
+  $HOME/.local/libexec/activity.py &
 # }}}

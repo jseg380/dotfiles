@@ -33,9 +33,9 @@ floating_layout = layout.Floating(
         Match(wm_class="makebranch"),
         Match(wm_class="maketag"),
         Match(wm_class="ssh-askpass"),
+        Match(wm_class="gnome-calculator"),             # Calculator
         Match(wm_class="popup-input"),                  # Custom wm_class
         Match(wm_class="Com.cisco.anyconnect.gui"),     # Cisco VPN
-        Match(wm_class="gnome-calculator"),             # Calculator
         Match(title="branchdialog"),
         Match(title="pinentry"),
     ],

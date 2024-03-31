@@ -46,10 +46,10 @@ DIR="$HOME/.local/bin"
 declare icon=""
 if [[ `pamixer --get-mute` == "true" ]]; then
   echo -n "ﱝ $vol% "
-  icon="/usr/share/icons/Custom-icons/vol_mute.svg"
+  icon="$XDG_DATA_HOME/icons/volume/vol_mute.svg"
 else
   echo -n "$($DIR/percentage $vol   奔 墳  ) $vol% "
-  icon="/usr/share/icons/Custom-icons/vol.svg"
+  icon="$XDG_DATA_HOME/icons/volume/vol.svg"
 fi
 
 # Use `stat -c%Y <file>` to get the last modification time of a file in seconds

@@ -44,19 +44,19 @@ function set_monitor() {
         xrandr \
         --output eDP-1 --primary --mode 1920x1080 --pos 0x0 --rotate normal \
         --output HDMI-1 --mode 1920x1080 --pos ${posArray[$1]} --rotate normal \
-        --output DP-1 --off --output DP-2 --off &
+        --output DP-1 --off \
+        --output DP-2 --off &
     else
         echo "Only the main screen was detected."
         xrandr \
         --output eDP-1 --primary --mode 1920x1080 --pos 0x0 --rotate normal \
-        --output HDMI-1 --off --output DP-1 --off &
+        --output HDMI-1 --off \
+        --output DP-1 --off \
+        --output DP-2 --off &
     fi
     
     # Reload qtile
     qtile cmd-obj -o cmd -f restart
-    
-    # Set wallpaper
-    $XDG_CONFIG_HOME/wallpaper/fehbg
     
     exit 0
 }
@@ -119,6 +119,3 @@ set_monitor $direction
 #    echo "For help use: $0 -h"
 #    exit 3
 #fi
-
-
-

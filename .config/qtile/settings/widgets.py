@@ -3,19 +3,22 @@
 from libqtile import widget
 from .theme import colors
 from libqtile.widget.battery import Battery, BatteryState
-#from .thingsiplay.widget import output   # Should substitute GetPollCommand, but doesn't work
+from libqtile.lazy import lazy
+from random import randrange
+from pathlib import Path
+from os.path import join as pjoin
 
-# Get the icons at https://www.nerdfonts.com/cheat-sheet (you need a Nerd Font)
 
-def base(fg="text", bg="dark"): 
+# Generic functions {{{
+def base(fg="text", bg="dark"):
     return {
-        "foreground": colors[fg],
-        "background": colors[bg]
+        "foreground": colors[fg] if fg in colors else fg,
+        "background": colors[bg] if bg in colors else bg
     }
 
 
-def separator():
-    return widget.Sep(**base(), linewidth=0, padding=5)
+def separator(bg="dark", size=16):
+    return widget.Sep(**base(fg=bg, bg=bg), linewidth=size)
 
 
 def icon(fg="text", bg="dark", fontsize=16, text="?"):
@@ -30,16 +33,53 @@ def icon(fg="text", bg="dark", fontsize=16, text="?"):
 def powerline(fg="light", bg="dark"):
     return widget.TextBox(
         **base(fg, bg),
-        # text="", # Icon: nf-oct-triangle_left
-        text="", # Icon: nf-cod-triangle_left
+        text="",       # Icon: nf-cod-triangle_left
         fontsize=34,
         padding=-2
     )
+# }}}
 
 
+# Custom widgets {{{
+# Battery Icon and Percentage
+class CustomBattery(Battery):
+  def build_string(self, status):
+    symbols = ""
+    index = min(max(int(status.percent * 10), 0), 9) # 0 to 9
+    char = symbols[index]
+
+    if status.state == BatteryState.CHARGING:
+        char += ""
+    if status.state == BatteryState.UNKNOWN:
+        char = ""
+
+    return str(self.format).format(char=char, percent=status.percent)
+
+
+class RandomWord(widget.TextBox):
+    def __init__(self, fg="text", bg="dark"):
+        self.generate_random_word()
+        super().__init__(
+            **base(fg=fg, bg=bg),
+            text=self.word,
+            mouse_callbacks={
+                'Button1': lazy.spawn(f"xdg-open 'https://www.collinsdictionary.com/dictionary/german-english/{self.word}'"),
+                'Button3': lazy.spawn(f"xdg-open 'https://dictionary.cambridge.org/dictionary/german-english/{self.word}'"),
+            }
+        )
+    
+    def generate_random_word(self):
+        self.word = "error"
+        words_file = pjoin(Path(__file__).parent.parent.resolve(), "1000-german-words.txt")
+        with open(words_file, "r") as f:
+            all_words = f.readlines()
+            self.word = all_words[randrange(0, len(all_words) - 1)].replace("\n", "")
+# }}}
+
+
+# Widgets present in both screens {{{
 def workspaces(): 
     return [
-        # separator(),
         widget.GroupBox(
             **base(fg="light"),
             font="JetBrainsMono Nerd Font",
@@ -61,92 +101,85 @@ def workspaces():
             other_screen_border=colors["dark"],
             disable_drag=True
         ),
-        separator(),
+
         widget.WindowName(**base(fg="focus"), fontsize=14, padding=5),
-        separator(),
     ]
 
+def word_widget(fg="text", bg="dark", left_bg="dark"):
+    return [
+        powerline(fg=bg, bg=left_bg),
 
-# Battery Icon & % | Replaces widget.Battery
-class MyBattery(Battery):
-  def build_string(self, status):
-    symbols = ""
-    index = int(status.percent * 10)
-    index = min(max(index, 0), 9) # 0 to 9
-    char = symbols[index]
-    if status.state == BatteryState.CHARGING:
-      char += ""
-      if status.state == BatteryState.UNKNOWN:
-        char = ""
-    return self.format.format(char=char, percent=status.percent)
+        icon(fg=fg, bg=bg, fontsize=20, text="󱍊 "), # Icon: nf-md-head_question
 
-battery = MyBattery(
-    **base(fg="light"),
-    format = "{char} {percent:2.0%}")
+        RandomWord(fg=fg, bg=bg),
 
+        separator(bg=bg, size=4),
+    ]
+
+def layout(fg="text", bg="dark", left_bg="dark"):
+    return [
+        powerline(fg=bg, bg=left_bg),
+
+        separator(bg=bg, size=2),
+        
+        widget.CurrentLayoutIcon(**base(fg=fg, bg=bg), scale=0.65),
+
+        separator(bg=bg, size=2),
+
+        widget.CurrentLayout(**base(fg=fg, bg=bg), padding=5),
+    ]
+
+def date_and_time(fg="text", bg="dark", left_bg="dark"):
+    return [
+        powerline(fg=bg, bg=left_bg),
+
+        separator(bg=bg, size=1),
+
+        icon(fg=fg, bg=bg, fontsize=17, text=" "), # Icon: nf-mdi-calendar_clock
+
+        widget.Clock(**base(fg=fg, bg=bg), format="%d/%m/%Y - %H:%M "),
+    ]
+
+# }}}
+
+def my_func(text):
+    return text.split(' ')[0]
+
+# Primary widgets {{{
 primary_widgets = [
     *workspaces(),
 
-    separator(),
-
-    powerline("color4", "dark"),
-
-    icon(bg="color4", text=" "), # Icon: nf-mdi-brightness_6
-
-    widget.Backlight(
-        background=colors["color4"],
-        foreground=colors["text"],
-        backlight_name="amdgpu_bl1",
-        change_command="brightness {0}",
-        update_interval=3600,            # 0.2s default value
-    ),
-
-    # powerline("color3", "color4"),
-
-    # icon(bg="color3", text=" "),  # Icon: nf-fa-feed
-    # 
-    # widget.Net(**base(bg="color3"), interface="wlan0"),
-
-    powerline("color2", "color4"),
+    # widget.TaskList(**base(fg="#ffffff", bg="#000000"), 
+    #                 highlight_method="block",
+    #                 ),
     
-    widget.CurrentLayoutIcon(**base(bg="color2"), scale=0.65),
+    *word_widget(bg="color4"),
 
-    icon(bg="color2", fontsize=2, text=" "),
+    *layout(bg="color2", left_bg="color4"),
 
-    widget.CurrentLayout(**base(bg="color2"), padding=5),
+    *date_and_time(bg="color1", left_bg="color2"),
 
-    powerline("color1", "color2"),
+    powerline(fg="dark", bg="color1"),
 
-    icon(bg="color1", fontsize=17, text=" "), # Icon: nf-mdi-calendar_clock
+    CustomBattery(**base(fg="light"), format = "{char} {percent:2.0%}"),
 
-    widget.Clock(**base(bg="color1"), format="%d/%m/%Y - %H:%M "),
+    widget.Systray(background=colors["dark"], padding=8),
 
-    powerline("dark", "color1"),
-
-    battery,
-
-    widget.Systray(background=colors["dark"], padding=5),
+    separator(bg="dark", size=8)
 ]
+# }}}
 
+
+# Secondary widgets {{{
 secondary_widgets = [
     *workspaces(),
 
-    separator(),
+    *layout(bg="color1", left_bg="dark"),
 
-    powerline("color1", "dark"),
-
-    widget.CurrentLayoutIcon(**base(bg="color1"), scale=0.65),
-
-    widget.CurrentLayout(**base(bg="color1"), padding=5),
-
-    powerline("color2", "color1"),
-
-    icon(bg="color2", fontsize=17, text=" "), # Icon: nf-mdi-calendar_clock
-
-    widget.Clock(**base(bg="color2"), format="%d/%m/%Y - %H:%M "),
-
-    # powerline("dark", "color2"),
+    *date_and_time(bg="color2", left_bg="color1"),
 ]
+# }}}
+
 
 widget_defaults = {
     "font": "JetBrainsMono Nerd Font Bold",
