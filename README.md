@@ -8,9 +8,9 @@ My dotfiles repo. Here are the configurations for the programs I use.
 The config files are for the following programs:
 
 * [Fish](https://fishshell.com/)
-* [Htop](https://htop.dev/)
 * [Kitty](https://sw.kovidgoyal.net/kitty/)
-* [Lunarvim](https://www.lunarvim.org/)
+* [LunarVim](https://www.lunarvim.org/)
+* [Neovim](https://neovim.io/)
 * [Qtile](http://www.qtile.org/)
 * [Ranger](https://github.com/ranger/ranger)
 * [Rofi (custom)](https://github.com/adi1090x/rofi)
@@ -19,13 +19,12 @@ The config files are for the following programs:
 
 ## Dependencies
 
-* [Feh](https://feh.finalrewind.org/)
-* [Libnotify](https://gitlab.gnome.org/GNOME/libnotify)
-* [Neovim](https://neovim.io/)
-* [Notification-daemon](https://gitlab.gnome.org/Archive/notification-daemon)
-* [Rofi](https://github.com/davatorium/rofi)
-* [Xinput](https://gitlab.freedesktop.org/xorg/app/xinput)
-* [Xrandr](https://gitlab.freedesktop.org/xorg/app/xrandr)
+* [Feh](https://feh.finalrewind.org/) (Background)
+* [Libnotify](https://gitlab.gnome.org/GNOME/libnotify) (Notifications)
+* [Notification-daemon](https://gitlab.gnome.org/Archive/notification-daemon) (Notifications)
+* [Rofi](https://github.com/davatorium/rofi) (Rofi base)
+* [Xinput](https://gitlab.freedesktop.org/xorg/app/xinput) (Input: Mouse, keyboard)
+* [Xrandr](https://gitlab.freedesktop.org/xorg/app/xrandr) (Screens)
   
   
 <br>
