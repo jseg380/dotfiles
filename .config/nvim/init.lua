@@ -6,9 +6,9 @@ vim.opt.incsearch = true
 
 -- Indentation
 vim.opt.tabstop = 4
+--vim.opt.softtabstop = 4
 vim.opt.expandtab = true
 vim.opt.shiftwidth = 4
---vim.opt.softtabstop = 4
 vim.opt.autoindent = true
 vim.opt.smartindent = true
 
@@ -48,7 +48,7 @@ vim.keymap.set('n', '<C-K>', '<C-W>k')
 vim.keymap.set('n', '<C-L>', '<C-W>l')
 
 -- Other
-vim.opt.wildmode = 'longest,list'
+-- vim.opt.wildmode = 'longest,list'
 vim.opt.clipboard = 'unnamedplus'
 vim.opt.cursorline = true
 vim.opt.ttyfast = true
@@ -57,9 +57,3 @@ vim.opt.ttyfast = true
 vim.opt.undofile = false
 -- vim.opt.undodir = "$HOME/.cache/nvim/undo-dir"
 -- vim.opt.undolevels = 200
-
--- Plugins
--- vim.cmd([[
---   filetype plugin indent on
---   filetype plugin on
--- ]])
