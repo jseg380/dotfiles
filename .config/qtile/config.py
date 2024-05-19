@@ -24,7 +24,7 @@ floats_kept_above = True
 focus_on_window_activation = "urgent"
 # follow_mouse_focus = True
 auto_minimize = False
-reconfigure_screens = False
+reconfigure_screens = True
 wmname = "LG3D"     # For Java UI Toolkits to work correctly
 
 

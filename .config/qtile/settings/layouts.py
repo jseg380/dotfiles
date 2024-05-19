@@ -29,15 +29,19 @@ floating_layout = layout.Floating(
     float_rules=[
         *layout.Floating.default_float_rules,
         # From reddit: https://www.reddit.com/r/qtile/comments/sgiscd/comment/huwrmlg/?utm_source=share&utm_medium=web2x&context=3
+        Match(wm_class="confirm"),
         Match(wm_class="confirmreset"),
+        Match(wm_class="dialog"),
+        Match(wm_class="download"),
+        Match(wm_class="error"),
         Match(wm_class="makebranch"),
         Match(wm_class="maketag"),
-        Match(wm_class="ssh-askpass"),
         Match(wm_class="gnome-calculator"),             # Calculator
         Match(wm_class="popup-input"),                  # Custom wm_class
         Match(wm_class="Com.cisco.anyconnect.gui"),     # Cisco VPN
         Match(title="branchdialog"),
         Match(title="pinentry"),
     ],
-    border_focus=colors["color4"][0]
+    border_focus=colors["focus"][0],
+    border_width=1,
 )

@@ -11,6 +11,9 @@ home_env = getenv("HOME", f"/home/{getuser()}")
 local_bin = p_join(home_env, ".local/bin")
 rofi_path = p_join(home_env, ".config/rofi")
 
+# Variables
+term = "kitty"
+
 mod = "mod4"
 
 keys = [Key(key[0], key[1], *key[2:]) for key in [
@@ -63,13 +66,13 @@ keys = [Key(key[0], key[1], *key[2:]) for key in [
     ([mod], "c", lazy.spawn("google-chrome-stable")),
 
     # File Explorer
-    ([mod], "e", lazy.spawn("pcmanfm")),
+    ([mod], "e", lazy.spawn(f"{term} ranger {home_env}")),
 
     # Terminal
-    ([mod], "Return", lazy.spawn("kitty")),
+    ([mod], "Return", lazy.spawn(term)),
 
-    # Screenshot (CoreShot)
-    ([mod, "shift"], "s", lazy.spawn("coreshot -s")),
+    # Screenshot
+    ([mod, "shift"], "s", lazy.spawn("flameshot gui")),
 
     # ------------ Hardware Configs ------------
 
@@ -80,8 +83,6 @@ keys = [Key(key[0], key[1], *key[2:]) for key in [
 
     # Brightness
     # Bugs: duplicated or triplicated keystrokes when pressed once
-    # ([], "XF86MonBrightnessUp", lazy.spawn(p_join(local_bin, "brightness +5% "))),
-    # ([], "XF86MonBrightnessDown", lazy.spawn(p_join(local_bin, "brightness -5% "))),
-    ([], "XF86MonBrightnessUp", lazy.spawn("brightnessctl +5%")),
-    ([], "XF86MonBrightnessDown", lazy.spawn("brightnessctl -5%")),
+    ([], "XF86MonBrightnessUp", lazy.spawn(p_join(local_bin, "brightness +5% "))),
+    ([], "XF86MonBrightnessDown", lazy.spawn(p_join(local_bin, "brightness -5% "))),
 ]]

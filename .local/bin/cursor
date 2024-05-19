@@ -4,150 +4,184 @@
 # File: ~/.local/bin/cursor
 #
 
-###############################################################################
-# Functions
+#··············································································
+# Variables {{{
 
-# https://stackoverflow.com/a/8574392
-set +e #otherwise the script will exit on error
-containsElement () {
-  local e match="$1"
-  shift
-  for e; do [[ "$e" == "$match" ]] && return 0; done
-  return 1
+programName="$(basename $0)"
+
+xdgConfig="${XDG_CONFIG_HOME:-$HOME/.config}"
+xdgData="${XDG_DATA_HOME:-$HOME/.local/share}"
+
+# Cursor themes located at local icons won't apply to system wide configuration
+# For example, for the window manager in the case of Qtile
+localIcons="${xdgData}/icons"
+globalIcons="/usr/share/icons"
+
+defaultTheme="$(sed -n -E '/^Inherits=(.*)$/s//\1/p' \
+                 ${globalIcons}/default/index.theme)"
+
+themeFiles=( "${xdgConfig}/X11/Xresources" "$HOME/.Xresources" )
+
+themes=()
+
+# }}}
+
+
+#··············································································
+# Functions {{{
+
+function info_program() {
+cat << EOF
+Usage: $programName [OPTION] [THEME]
+
+Set cursor theme.
+
+Options:
+  -h, --help           display this help and exit
+  -l, --list-themes    list installed cursor themes
+  -s, --set-theme      set cursor to specified theme
+
+If no option is passed the current cursor theme will be shown
+EOF
 }
 
-###############################################################################
-# Program
+function show_current() {
+    local currentTheme="$(sed -n -E \
+        '/Xcursor\.theme:\s*(.*)$/s//\1/p' <(xrdb -query))"
 
-# Show help
-if [ $# == 1 ] && ([ $1 == "--help" ] || [ $1 == "-h" ]); then
-  echo
-  echo "Usage:"
-  echo " cursor [options]"
-  echo
-  echo "Sets cursor theme."
-  echo
-  echo "Options:"
-  echo " -s, --set-cursor <theme>  sets cursor theme to <theme>"
-  echo " --show-cursors            show installed cursor themes"
-  echo " --show-current            show currently used cursor theme"
-  echo " -h, --help                display this help"
-  echo
-  echo "If no option is given the program will use '--show-current' option"
-  exit 0
+    echo "Current theme: ${currentTheme:-$defaultTheme}"
+}
+
+function get_themes() {
+    while IFS= read -r line
+    do
+        themes+=("$line")
+    done < <(find $globalIcons $localIcons -type d -name "cursors" | 
+             awk -F '/' '{print $(NF-1)}')
+    unset IFS
+}
+
+function check_arg() {
+    get_themes
+    for theme in "${themes[@]}"
+    do
+        [ "$theme" = "$1" ] && return 0
+    done
+    return 1
+}
+
+function set_theme() {
+    local newTheme="$1"
+    local xresParam="Xcursor.theme"
+    local themeIndex=0
+    local themeFile="${themeFiles[$themeIndex]}"
+
+    if ! [ -f "$themeFile" ]
+    then
+        echo -n -e \
+            "No Xresources file was found." "\n" \
+            "\bSelect where to create it:" "\n" \
+            "\b  1 $HOME/.config/X11/Xresources" "\n" \
+            "\b  2 $HOME/.Xresources" "\n" \
+            "\bEnter a selection (default=1): "
+        read themeIndex
+
+        themeIndex=${themeIndex:-1}
+        [ $themeIndex -lt 1 ] || [ $themeIndex -gt 2 ] && {
+            echo "Invalid selection: Aborting."; 
+            exit 1;
+        }
+        ((themeIndex--))
+
+        # Update the file theme selected
+        themeFile="${themeFiles[$themeIndex]}"
+    fi
+    mkdir -p "$(dirname $themeFile)"
+    touch "$themeFile"
+
+    # Write the theme in the Xresources file
+    if [ "$(grep $xresParam: $themeFile)" = "" ]
+    then
+        # If it didn't exist, just add it to the file
+        echo "${xresParam}: $newTheme" >> "$themeFile"
+    else
+        # Otherwise modify it with sed
+        sed -i -E "s/${xresParam}:[[:space:]]+.*$/${xresParam}: ${newTheme}/" \
+                  "$themeFile"
+    fi
+    
+    # Reload Xresources with xrdb
+    xrdb -load "$themeFile"
+
+    # Set the global theme for other applications (e.g. display manager)
+    local tmpFile="$(mktemp)"
+    cat "${globalIcons}/default/index.theme" > "$tmpFile"
+    sed -i -E "s/^Inherits=.*$/Inherits=${newTheme}/" "$tmpFile"
+    cat "$tmpFile" > "${globalIcons}/default/index.theme"
+    rm "$tmpFile"
+
+    echo "Theme set to '$newTheme'"
+
+    return 0
+}
+
+function list_themes() {
+    get_themes
+    for theme in "${themes[@]}"
+    do
+        echo -n "$theme"
+        echo "$( [ $theme = $defaultTheme ] && echo ' (default)' )"
+    done
+}
+
+# }}}
+
+
+#··············································································
+# Main {{{
+
+if [ $# -eq 0 ]
+then
+    show_current
+    exit 0
 fi
 
-
-# Nº of arguments check
-if [ $# -gt 2 ]; then
-  echo "cursor: error no more than 2 arguments were expected"
-  echo "Try 'cursor --help' for more information."
-  exit 1
-elif [ $# -eq 2 ] && [ "$1" != "-s" ] && [ "$1" != "--set-cursor" ]; then
-  echo "cursor: error only option '--set-cursor' expects 2 arguments"
-  echo "Try 'cursor --help' for more information."
-  exit 1
-elif ([ "$1" == "s" ] || [ "$1" == "--set-cursor" ]) && [ $# != 2 ]; then
-  echo "cursor: error option '$1' expected another argument"
-  echo "Try 'cursor --help' for more information."
-  exit 1
+if [ $# -gt 2 ]
+then
+    echo "$programName: too many arguments"
+    echo "Try '$programName --help' for more information."
+    exit 1
 fi
 
-local_theme="$XDG_DATA_HOME/icons/default/index.theme"
-global_theme="/usr/share/icons/default/index.theme"
+case "$1" in
+    "-h" | "--help")
+        info_program
+        exit 0
+        ;;
+    "-s" | "--set-theme")
+        if [ $# -ne 2 ]
+        then
+            echo "$programName: no theme was passed"
+            echo "Use '$programName --list-themes' to list available themes."
+            exit 1
+        elif ! check_arg $2
+        then
+            echo "$programName: unrecognized theme '$2'"
+            echo "Use '$programName --list-themes' to list available themes."
+            exit 1
+        fi
+        set_theme $2
+        exit 0
+        ;;
+    "-l" | "--list-themes")
+        list_themes
+        exit 0
+        ;;
+    *)
+        echo "$programName: unrecognized option '$1'"
+        echo "Try '$programName --help' for more information."
+        exit 1
+        ;;
+esac
 
-# Default behaviour
-if [ $# -eq 0 ] || ([ $# -eq 1 ] && [ "$1" == "--show-current" ]); then
-  declare aux
-  if test -e $local_theme ; then
-    aux="$(tail -1 $local_theme)"
-  elif test -e $global_theme ; then
-    aux="$(tail -1 $global_theme)"
-  fi
-
-  aux_array=(${aux//=/ })
-  current_theme=${aux_array[1]}
-
-  echo $current_theme
-
-  exit 0
-fi
-
-
-# List of installed cursor themes (*)
-
-declare -a themes=()
-
-while IFS= read -r line; do
-  aux_array=(${line//// })
-
-  declare -i i=0
-
-  # Could be improved using Regex =~
-  while ([ "${aux_array[$i]}" != ".icons" ] && [ "${aux_array[$i]}" != "icons" ]) ; do
-    i=$i+1
-  done
-
-  themes+=("${aux_array[$i+1]}")
-
-done <<< "$(find /usr/share/icons $XDG_DATA_HOME/icons/ -type d -name "cursors")"
-unset IFS
-
-
-if [ "$1" == "-s" ] || [ "$1" == "--set-cursor" ]; then
-  containsElement "$2" "${themes[@]}"
-
-  if [ $? == 1 ]; then
-    echo "cursor: '$2' is not a valid cursor theme"
-    echo "To see all installed cursor themes try 'cursor --show-cursors'"
-    echo "Try 'cursor --help' for more information."
-    exit 2
-  fi
-
-  tmp_file="/tmp/tmp_file"
-
-  echo -e "[Icon Theme]\nInherits=$2" > $tmp_file
-  cat $tmp_file > $local_theme
-  sudo bash -c "cat \"$tmp_file\" > $global_theme"
-
-
-  head -7 $GTK2_RC_FILES > $tmp_file
-  echo "gtk-cursor-theme-name=\"$2\"" >> $tmp_file
-  tail -10 $GTK2_RC_FILES >> $tmp_file
-  cat $tmp_file > $GTK2_RC_FILES
-
-  head -4 $XDG_CONFIG_HOME/gtk-3.0/settings.ini > $tmp_file
-  echo "gtk-cursor-theme-name=\"$2\"" >> $tmp_file
-  tail -10 $XDG_CONFIG_HOME/gtk-3.0/settings.ini >> $tmp_file
-  cat $tmp_file > $XDG_CONFIG_HOME/gtk-3.0/settings.ini
-
-  rm $tmp_file
-  
-  echo "Cursor theme set to $2"
-
-  exit 0
-fi
-
-
-if [ "$1" == "--show-cursors" ]; then
-  for theme in "${themes[@]}"; do
-    echo $theme
-  done
-
-  exit 0
-fi
-
-
-# If it has reached this point, the first parameter wasn't any of the
-# valid options
-echo "cursor: option '$1' unrecognized"
-echo "Try 'cursor --help' for more information."
-exit 1
-
-
-
-# * The solution is a mix of reading line by line and processing each line by
-# splitting it into multiple strings, storing them into an array and using
-# the value that is useful
-# https://stackoverflow.com/a/10929511
-# https://stackoverflow.com/a/5257398
+# }}}

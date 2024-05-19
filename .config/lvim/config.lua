@@ -103,11 +103,11 @@ lvim.builtin.which_key.mappings["b"]["<Right>"] = {
 -------------------------------------------------------------------------------
 
 -- JDTLS (Java)
-require("lvim.lsp.manager").setup("jdtls", {
-  root_dir = function()
-    return vim.fn.getcwd()
-  end,
-})
+-- require("lvim.lsp.manager").setup("jdtls", {
+--   root_dir = function()
+--     return vim.fn.getcwd()
+--   end,
+-- })
 
 
 --[[

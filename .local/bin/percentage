@@ -4,131 +4,188 @@
 # File: ~/.local/bin/percentage
 #
 
-###############################################################################
-# Functions
+#··············································································
+# Variables {{{
 
-function divide() {
-  if [ $# -eq 2 ]; then
-    # Format: float with 2 decimals filled with 0 in case they are "empty"
-    solution=$(python -c "a='{:05.2f}'.format($1/$2); print(f'{a}')")
+programName="$(basename $0)"
 
-    echo "$solution"
-  elif [ $# -eq 3 ] && [ $3 == "-i" ]; then
-    # Format: integer
-    solution=$(python -c "print(f'{int($1//$2)}')")
+number="$1"
+values=($@)
 
-    echo "$solution"
-  fi
+# }}}
+
+
+#··············································································
+# Functions {{{
+
+function info_program() {
+cat << EOF
+Usage: $programName NUMBER [OPTION] [VALUES]
+
+Prints one of the given values depending of the number passed.
+The values are assigned proportionally, e.g. if arguments are:
+'30 one two three' then 'one' will be returned because it's in
+the first range of [0, 33] [33, 66] [66, 100]
+
+NUMBER is a positive integer in range [0, 100]
+
+Options:
+  -h, --help           display this help and exit
+  -e, --examples       display some examples on how to use the program
+  -r, --repeat         if present two other parameters are needed:
+                         string to repeat
+                         max
+Values:
+  value1 value2 ...  values are given as parameters
+  file               values are written inside a file
+
+File format: Values must be in the same line separated by spaces ' '
+EOF
 }
 
-###############################################################################
-# Program
+function show_examples() {
+cat << EOF
+Examples:
 
-# Show help
-if [ $# -eq 1 ] && ([ "$1" == "-h" ] || [ "$1" == "--help" ]); then
-  echo
-  echo "Usage:"
-  echo "percentage <number> [option] <values>"
-  echo
-  echo "Prints one of the given values depending of the number passed."
-  echo "The values are assigned proportionally, e.g. if arguments are:"
-  echo "'30 one two three' then 'one' will be returned because it's in"
-  echo "the first range of [0, 33] [33, 66] [66, 100]"
-  echo
-  echo " <number> is a positive integer in range [0, 100]"
-  echo
-  echo "Option:"
-  echo " --repeat if present two other parameters are needed:"
-  echo "           value that will be repeated to represent the % over the max"
-  echo "           an integer that represents the max"
-  echo
-  echo "Valid values:"
-  echo " value1 value2 ...  values are given as parameters"
-  echo " file               values are written inside a file"
-  echo
-  echo "File format: Values must be in the same line separated by spaces ' '"
-  exit 0
+$programName 15 Q1 Q2 Q3 Q4
+    -> Q1
+
+$programName 34% Q1 Q2 Q3 Q4
+    -> Q2
+
+$programName 70 Q1 Q2 Q3
+    -> Q3
+
+echo -n "Q1 Q2 Q3" > file.txt
+$programName 70 file.txt
+    -> Q3
+
+$programName 20 --repeat / 10
+    -> //
+
+$programName 20% --repeat A 5
+    -> A
+
+$programName 50% --repeat n/ 10
+-> n/n/n/n/n/n/
+
+EOF
+}
+
+function check_number() {
+    echo "$number" | grep -qP '^[0-9]+%?$' && number="${number//%/}" && return 0
+    return 1
+}
+
+function divide() {
+    local n1=$(printf "%.0f" "$1")
+    local n2=$(printf "%.0f" "$2")
+    local result=$(( $n1 / $n2 ))
+
+    if [ $# -eq 2 ]
+    then
+        local quotient=$(( 10**2 * $n1 / $n2 ))
+        local integerPart=$(( quotient / 100 ))
+        local decimalPart=$(( quotient % 100 ))
+        result=$(printf "%d.%02d\n" $integerPart $decimalPart)
+    fi
+
+    echo "$result"
+
+    return 0
+}
+
+function normal_mode() {
+    [ $number -ge 100 ] && echo -n "${values[-1]}" && return 0
+
+    local intervalSize=$(divide 100 ${#values[@]})
+    local interval=$(divide $number $intervalSize -i)
+    echo -n "${values[$interval]}"
+
+    return 0
+}
+
+function repeat_mode() {
+    local repString=$1
+    local max=$2
+
+    local times=$(python3 -c "print(f'{min(int($number / 100 * $max)+1, $max)}')")
+
+    for ((i = 0; i < $times; i++))
+    do
+        echo -n "$repString"
+    done
+
+    return 0
+}
+
+# }}}
+
+
+#··············································································
+# Main {{{
+
+
+case "$1" in
+    "-h" | "--help")
+        info_program
+        exit 0
+        ;;
+    "-e" | "--examples")
+        show_examples
+        exit 0
+        ;;
+esac
+
+
+if [ $# -lt 2 ]
+then
+    echo "$programName: too few arguments"
+    echo "Try '$programName --help' for more information."
+    exit 1
 fi
 
-# Incorrect amount of arguments
-if [ $# -lt 2 ]; then
-  echo "Error. At least 2 arguments were expected."
-  echo "Try 'percentage --help' for more information."
-  exit 1
+
+if ! check_number
+then
+    echo "$programName: expected a number but received '$number'"
+    echo "Try '$programName --help' for more information."
+    exit 1
+elif [ $number -gt 100 ]
+then
+    echo "$programName: the number must be an integer in [0, 100]"
+    echo "Try '$programName --help' for more information."
+    exit 1
 fi
 
-# Format the 1st argument to remove any % characters
-if [[ "$1" == *% ]]; then
-  number=${1::-1}
-else
-  number=$1
+# If number is 0 then print the empty string ""
+[ $number -eq 0 ] && echo -n "" && exit 0
+
+# Repeat must be the 2nd option passed for backward compatibility
+if [ $# -eq 4 ] && ([ "$2" = "-r" ] || [ "$2" = "--repeat" ])
+then
+    repeat_mode $3 $4
+    exit 0
 fi
 
-# Wrong number
-#if [ $number -lt 0 ] || [ $number -gt 100 ]; then
-# Allows number > 100 for supporting volume over 100%
-if [ $number -lt 0 ]; then
-  echo "Error. 1st argument must be a positive integer in range [0, 100]"
-  echo "Try 'percentage --help' for more information."
-  exit 1 
-fi
+case "$1" in
+    "-"*)
+        echo "$programName: unrecognized option '$1'"
+        echo "Try '$programName --help' for more information."
+        exit 1
+        ;;
+    *)
+        values=("${values[@]:1}")
+        if [ $# -eq 2 ] && read -r -a values < "$2" 2> /dev/null
+        then
+            echo "$programName: error while reading file '$2'"
+            echo "Try '$programName --help' for more information."
+            exit 1
+        fi
 
-# In both modes when the number is 0 nothing is printed
-if [ $number -eq 0 ]; then
-  echo -n ""
-  exit 0
-fi
+        normal_mode
+        exit 0
+        ;;
+esac
 
-
-# "Repeat" mode
-if [ $# -eq 4 ] && [ "$2" == "--repeat" ]; then
-  value=$3
-  max=$4
-
-  times=$(python -c "print(f'{min(int($number / 100 * $max)+1, $max)}')")
-
-  for ((i = 0; i < $times; i++))
-  do
-    echo -n "$value"
-  done
-
-  exit 0
-fi
-
-
-# "Normal" mode
-# Declarations
-declare -a values
-
-# Arguments passed in a file
-if [ $# -eq 2 ]; then
-  if !(test -e $2); then
-    echo "Error. File $2 doesn't exist."
-    echo "Try 'percentage --help' for more information."
-    exit 2
-  elif !(test -r $2); then
-    echo "Error. Read acces to $2 denied."
-    echo "Try 'percentage --help' for more information."
-    exit 2
-  fi
-
-  read -r -a values < $2
-else
-  declare -a arguments=("$@") # Doesn't include program's name
-  for ((i = 1; i < $#; i=i+1))
-  do
-    values+=("${arguments[i]}")
-  done
-fi
-
-
-# If value is 100, it's in the last interval
-if [ $number -ge 100 ]; then
-  echo -n "${values[-1]}"
-else
-  # Calculate interval to which the number belongs
-  interval_size=$(divide 100 ${#values[@]})
-  interval=$(divide $number $interval_size -i)
-
-  echo -n "${values[$interval]}"
-fi
+# }}}

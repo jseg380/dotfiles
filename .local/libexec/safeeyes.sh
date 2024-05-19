@@ -5,7 +5,7 @@
 #
 
 #··············································································
-# Variables {{{ var
+# Variables {{{
 
 # SSIDs
 current_ssid=""
@@ -31,10 +31,10 @@ decision=""
 # Notification summary
 summary="Safe eyes"
 
-# var }}}
+# }}}
 
 #··············································································
-# Functions {{{ fun
+# Functions {{{
 
 # Write in the log a message
 #     $1 : string, message to write
@@ -54,10 +54,10 @@ function writeLog() {
   printf -- "${message}\n" >> "${log_file}"
 }
 
-# fun }}}
+# }}}
 
 #··············································································
-# Main {{{ main
+# Main {{{
 
 writeLog "-- Starting $(date +%s) --" "false"
 
@@ -145,4 +145,4 @@ notify-send --expire-time=4000 \
             "<span color='green'><b>Safe eyes started successfully</b></span>"
 exit 0
 
-# main }}}
+# }}}

@@ -4,118 +4,171 @@
 # File: ~/.local/bin/set-monitor
 #
 
-################################################################################
-# Variable declarations
+#··············································································
+# Variables {{{
 
-directionArray=("up" "right" "down" "left")
-posArray=("0x-1080" "1920x0" "0x1080" "-1920x0")
-upArray=("up" "u" "north" "n")
-downArray=("down" "d" "south" "s")
-rightArray=("right" "r" "east" "e")
-leftArray=("left" "l" "west" "w")
-
-programName=$0
 default=1
+upArray=("up" "u" "north" "n" "above")        # 0
+rightArray=("right" "r" "east" "e")           # 1
+downArray=("down" "d" "south" "s" "below")    # 2
+leftArray=("left" "l" "west" "w")             # 3
+arraysNames=("upArray" "rightArray" "downArray" "leftArray")
+directionArray=("--above" "--right-of" "--below" "--left-of")
 
-error_code=10
+monitors=()
+connectedMonitors=()
+mainMonitor=""
+numMonitors=$(xrandr | grep 'connected' | wc -l)
 
-################################################################################
-# Functions
+programName="$(basename $0)"
+
+errorCode=10
+
+# }}}
+
+
+#··············································································
+# Functions {{{
 
 function info_program() {
-    echo "Use: $programName <position>"
-    echo "<position> is an optional argument which indicates the position of" \
-         "the second screen relative to the main screen. If <position>" \
-         "argument is skipped then it will use the default" \
-         "(${posArray[$default]})" ; echo
-    echo "Valid values (both lower and upper case valid): "
-    echo "Up    : ${upArray[*]^}"
-    echo "Down  : ${downArray[*]^}"
-    echo "Right : ${rightArray[*]^}"
-    echo "Left  : ${leftArray[*]^}"
+defaultDirection="$(local a=${arraysNames[$default]}; echo ${!a[0]})"
+cat << EOF
+Usage: $programName [OPTION] [POSITION]
+
+Set secondary monitor position relative to the primary monitor.
+
+Options:
+  -h, --help    display this help and exit
+  -m, --mirror  mirror the output of primary monitor
+
+Positions (case insensitive):
+  ${upArray[*]^}
+  ${rightArray[*]^}
+  ${downArray[*]^}
+  ${leftArray[*]^}
+
+If no position is passed '${defaultDirection}' is used.
+If the option mirror is passed then no position must be passed.
+EOF
 }
 
-function set_monitor() {
-    hdmi=`xrandr | grep ' connected' | grep 'HDMI' | awk '{print $1}'`
+function get_monitors() {
+    # Create temporal file to store output of commands
+    tmpFile=$(mktemp)
+
+    xrandr | grep 'connected' | awk '{print $1}' > $tmpFile
+    while IFS= read -r line
+    do
+        monitors+=("$line")
+    done < $tmpFile
+
+    xrandr | grep -P ' connected' | awk '{print $1}' > $tmpFile
+    while IFS= read -r line
+    do
+        connectedMonitors+=("$line")
+    done < $tmpFile
+
+    # Delete the temporal file
+    rm $tmpFile
+
+    # Assign mainMonitor
+    # By default the monitor targeted as primary
+    mainMonitor="$(xrandr | grep 'primary' | awk '{print $1}')"
+    # Otherwise the one considered first by xrandr
+    [ "$mainMonitor" = "" ] && mainMonitor="${connectedMonitors[0]}"
+}
+
+function get_direction() {
+    local option="${1,,}"   # Convert to lowercase
+
+    for i in "${!arraysNames[@]}"
+    do
+        currentArray="${arraysNames[i]}[@]"
+        for element in "${!currentArray}"
+        do
+            [ "$option" = "${element,,}" ] && echo -n "$i" && return 0
+        done
+    done
     
-    # Set monitor
-    if [ "$hdmi" = "HDMI-1" ]; then
-        echo "Setting new screen ${directionArray[$1]} relative to main screen"
-        xrandr \
-        --output eDP-1 --primary --mode 1920x1080 --pos 0x0 --rotate normal \
-        --output HDMI-1 --mode 1920x1080 --pos ${posArray[$1]} --rotate normal \
-        --output DP-1 --off \
-        --output DP-2 --off &
-    else
-        echo "Only the main screen was detected."
-        xrandr \
-        --output eDP-1 --primary --mode 1920x1080 --pos 0x0 --rotate normal \
-        --output HDMI-1 --off \
-        --output DP-1 --off \
-        --output DP-2 --off &
-    fi
+    echo -n "$errorCode"
+}
+
+function manage_monitors() {
+    get_monitors
     
-    # Reload qtile
-    qtile cmd-obj -o cmd -f restart
+    local params=""
+
+    for i in "${connectedMonitors[@]}"
+    do
+        [ "$i" = "$mainMonitor" ] && continue
+
+        if [ "$1" = "set" ]
+        then
+            params+=$(printf -- "--output %s --auto %s %s " \
+                                "$i" "${directionArray[$2]}" "$mainMonitor")
+        elif [ "$1" = "mirror" ]
+        then
+            params+=$(printf -- "--output %s --auto --same-as %s " \
+                                "$i" "$mainMonitor")
+        fi
+    done
     
+    xrandr $params && return 0
+
+    echo "An error occurred executing 'xrandr $params'"
+    exit 1
+}
+
+# }}}
+
+
+#··············································································
+# Main {{{
+
+# Default behaviour
+if [ $# -eq 0 ]
+then
+    manage_monitors "set" $default
     exit 0
-}
+fi
 
-################################################################################
-# Argument check
-
-if [ $# -gt 1 ]; then
-    echo "Error. Too many arguments. This program takes as much as 1 argument."
-    echo "For help use: $0 -h"
+# TODO: Support for adjusting multiple monitors
+# Impediments: Extremely likely that the user won't know the order in which 
+# the video ports are wired, so it may be unintuitive at first
+# if [ $# -gt $numMonitors ]
+if [ $# -ne 1 ]
+then
+    echo "$programName: too many arguments"
+    echo "Try '$programName --help' for more information."
     exit 1
 fi
 
-if [ $# -eq 1 ] && ([ "$1" == "-h" ] || [ "$1" == "--help" ]); then
-    info_program
-    exit 0
-fi
-
-if [ $# -eq 0 ]; then
-    set_monitor $default
-fi
-
-# Argument verification
 # If the program has reached this point, then there is exactly one argument
-option="${1,,}"
+case "$1" in
+    "-h" | "--help")
+        info_program
+        exit 0
+        ;;
+    "-m" | "--mirror")
+        manage_monitors "mirror"
+        exit 0
+        ;;
+    "-"*)
+        echo "$programName: unrecognized option '$1'"
+        echo "Try '$programName --help' for more information."
+        exit 1
+        ;;
+esac
 
-~/.local/bin/c_program/get_direction $option
-declare -i direction=$?
+direction=$(get_direction "$1")
 
-if [[ $direction -eq $error_code ]]; then
-    echo "Argument $1 is not a valid value."
-    echo "For help use: $0 -h"
-    exit 3
+if [ $direction -eq $errorCode ]
+then
+    echo "$programName: unrecognized direction '$1'"
+    echo "Try '$programName --help' for more information."
+    exit 1
 fi
 
-set_monitor $direction
+manage_monitors "set" $direction
 
-################################################################################
-
-# NOT WORKING AS DESIRED, IF POSSIBLE IT WOULD BE BETTER TO IMPLEMENT THE 
-# WHOLE PROGRAM IN BASH WITHOUT MAKING USE OF EXTERNAL PROGRAMS
-#if [[ "${upArray[@]}" =~ $option ]]; then
-#    echo "${directionArray[0]^}"
-#    exit 0
-#    set_monitor 0
-#elif [[ "${rightArray[@]}" =~ $option ]]; then
-#    echo "${directionArray[1]^}"
-#    exit 0
-#    set_monitor 1
-#elif [[ "${downArray[@]}" =~ $option ]]; then
-#    echo "${directionArray[2]^}"
-#    exit 0
-#    set_monitor 2
-#elif [[ "${leftArray[@]}" =~ $option ]]; then
-#    echo "${directionArray[3]^}"
-#    exit 0
-#    set_monitor 3
-#else
-#    echo "Argument $1 is not a valid value."
-#    echo "For help use: $0 -h"
-#    exit 3
-#fi
+# }}}

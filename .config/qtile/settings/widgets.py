@@ -50,8 +50,10 @@ class CustomBattery(Battery):
 
     if status.state == BatteryState.CHARGING:
         char += ""
-    if status.state == BatteryState.UNKNOWN:
+    elif status.state == BatteryState.UNKNOWN:
         char = ""
+    elif status.percent <= 0.3:
+        char = "!!!"
 
     return str(self.format).format(char=char, percent=status.percent)
 
@@ -148,20 +150,18 @@ def my_func(text):
 # Primary widgets {{{
 primary_widgets = [
     *workspaces(),
-
-    # widget.TaskList(**base(fg="#ffffff", bg="#000000"), 
-    #                 highlight_method="block",
-    #                 ),
     
-    *word_widget(bg="color4"),
+    # *word_widget(bg="color4"),
+    # *layout(bg="color2", left_bg="color4"),
 
-    *layout(bg="color2", left_bg="color4"),
+    *layout(bg="color2", left_bg="dark"),
 
     *date_and_time(bg="color1", left_bg="color2"),
 
     powerline(fg="dark", bg="color1"),
 
-    CustomBattery(**base(fg="light"), format = "{char} {percent:2.0%}"),
+    CustomBattery(**base(fg="light"), format = "{char} {percent:2.0%}", 
+                  notify_below=31, notification_timeout=0),
 
     widget.Systray(background=colors["dark"], padding=8),
 
