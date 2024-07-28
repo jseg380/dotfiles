@@ -7,15 +7,15 @@
 -------------------------------------------------------------------------------
 
 -- Options
-vim.opt.tabstop = 4                          -- Size of tabs in spaces
+vim.opt.tabstop = 2                          -- Size of tabs in spaces
 vim.opt.shiftwidth = 0                       -- Use same as tabstop for >>,<<
 vim.opt.relativenumber = true                -- Relative line numbers
 vim.opt.termguicolors = true                 -- Use GUI colors
 vim.opt.colorcolumn = "80"                   -- Marker at 80th char
 vim.opt.clipboard = "unnamedplus"            -- For system clipboard
-vim.opt.foldmethod = "expr"
-vim.opt.foldexpr = "nvim_treesitter#foldexpr()"
-vim.opt.foldenable = false
+-- vim.opt.foldmethod = "expr"
+-- vim.opt.foldexpr = "nvim_treesitter#foldexpr()"
+-- vim.opt.foldenable = false
 
 
 
@@ -43,13 +43,6 @@ vim.opt.foldenable = false
 -- lvim.colorscheme = "lunar"
 
 
--- Disable icons, minimalist setup
--- lvim.use_icons = false
-
-
--- lvim.log.level = "info"
-
-
 -- Format on save
 -- lvim.format_on_save = {
 --   enabled = true,
@@ -61,10 +54,12 @@ vim.opt.foldenable = false
 -------------------------------------------------------------------------------
 -- Plugins
 -------------------------------------------------------------------------------
+
 lvim.plugins = {
   {
     "catppuccin/nvim",
-    name = "catppuccin",
+    name = "catppuccin-theme",
+    enabled = false,
   },
   {
     "folke/trouble.nvim",
@@ -72,10 +67,15 @@ lvim.plugins = {
   },
   {
     "lervag/vimtex",
-    lazy = false,                         -- Do not load until necessary
-    init = function()
-      -- VimTex configuration goes here
-    end
+    lazy = true,    -- Do not load until necessary
+  },
+  {
+    "simrat39/symbols-outline.nvim",
+    config = function()
+      require("symbols-outline").setup({
+        autofold_depth = 1,
+      })
+    end,
   },
 }
 
@@ -95,6 +95,10 @@ lvim.builtin.which_key.mappings["b"]["<Left>"] = {
 
 lvim.builtin.which_key.mappings["b"]["<Right>"] = {
   "<cmd>BufferLineMoveNext<cr>", "Move buffer to the right"
+}
+
+lvim.builtin.which_key.mappings["S"] = {
+  "<cmd>SymbolsOutline<cr>", "Symbols outline"
 }
 
 
@@ -176,6 +180,9 @@ end
 -- Treesitter
 lvim.builtin.treesitter.ignore_install = { "haskell" }
 
+-- Project
+lvim.builtin.project.silent_chdir = false
+
 
 -------------------------------------------------------------------------------
 -- Autocommands
@@ -183,10 +190,9 @@ lvim.builtin.treesitter.ignore_install = { "haskell" }
 
 lvim.autocommands = {
   {
-    -- Custom tab size for java files
     "BufWinEnter",
     {
-      pattern = { "*.java" , "*/juego/*.js" },
+      pattern = { "*.json", },
       callback = function()
         vim.cmd [[ setlocal tabstop=4 shiftwidth=4 ]]
       end

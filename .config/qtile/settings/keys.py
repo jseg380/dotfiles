@@ -1,7 +1,7 @@
 # Qtile keybindings
 
 from libqtile.config import Key
-from libqtile.command import lazy
+from libqtile.lazy import lazy
 from os import getenv
 from os.path import join as p_join
 from getpass import getuser
