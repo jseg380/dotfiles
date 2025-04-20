@@ -1,4 +1,4 @@
-#: Qtile {{{
+#: (CURRENTLY UNUSED) Qtile {{{
 if [ "$DESKTOP_SESSION" = "qtile" ]
 then
   #: Screen, wallpaper {{
