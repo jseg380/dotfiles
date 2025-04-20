@@ -1,0 +1,13 @@
+#!/bin/bash
+# For allocator module
+if [[ "$1" == "list" && "$2" == "--installed" ]]; then
+    echo "Listing... (fake output)"
+    echo "openssh-client/stable,now 1:8.4p1-5 amd64 [installed]"
+    echo "awscli/stable,now 2.4.0-1 amd64 [installed]"
+    echo "vagrant/stable,now 2.4.0-1 amd64 [installed]"
+    echo "virtualbox/stable,now 2.4.0-1 amd64 [installed]"
+    echo "sshpass/stable,now 2.4.0-1 amd64 [installed]"
+else
+    echo "Fake APT: command not found" >&2
+    exit 1
+fi

@@ -1,0 +1,41 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "additionalProperties": {
+        "type": "object",
+        "properties": {
+            "prefix": {
+                "type": "string",
+                "description": "The trigger text for the snippet."
+            },
+            "body": {
+                "type": "array",
+                "items": {
+                    "type": "string",
+                    "description": "A line of the snippet, can include placeholders."
+                },
+                "description": "The content of the snippet, represented as an array of strings."
+            },
+            "description": {
+                "type": "string",
+                "description": "An optional description of the snippet."
+            },
+            "condition": {
+                "type": "string",
+                "description": "An optional condition for when the snippet should be available."
+            },
+            "options": {
+                "type": "object",
+                "properties": {
+                    "show_in_completion": {
+                        "type": "boolean",
+                        "description": "Optional flag to control visibility in completion."
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        "required": ["prefix", "body"],
+        "additionalProperties": false
+    }
+}

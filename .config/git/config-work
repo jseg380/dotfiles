@@ -1,0 +1,7 @@
+[user]
+    name = Juan Manuel Segura
+    email = juanmanuel.segura@wazuh.com
+	signingKey = /home/juanma/.ssh/id_ed25519_work.pub
+
+[url "git@github.com-work"]
+    insteadOf = git@github.com

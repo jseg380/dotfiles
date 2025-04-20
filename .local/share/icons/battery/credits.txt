@@ -1,9 +1,0 @@
-SVGs obtained from www.svgrepo.com
-
-Thanks to Will Kelly for this amazing work!
-https://www.svgrepo.com/author/Will%20Kelly/
-
-https://www.svgrepo.com/svg/491180/battery-empty
-https://www.svgrepo.com/svg/491182/battery-full
-https://www.svgrepo.com/svg/491184/battery-warning
-https://www.svgrepo.com/svg/491178/battery-charging

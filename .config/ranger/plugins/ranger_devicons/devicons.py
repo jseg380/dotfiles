@@ -128,6 +128,7 @@ file_node_extensions = {
     'jpg'      : '',
     'js'       : '',
     'json'     : '',
+    'jsonc'    : '',
     'jsx'      : '',
     'key'      : '',
     'ksh'      : '',
@@ -151,7 +152,7 @@ file_node_extensions = {
     'ml'       : 'λ',
     'mli'      : 'λ',
     'mov'      : '',
-    'mp3'      : '󰝚',
+    'mp3'      : '',
     'mp4'      : '',
     'mpeg'     : '',
     'mpg'      : '',
@@ -160,7 +161,7 @@ file_node_extensions = {
     'nix'      : '',
     'o'        : '',
     'ogg'      : '',
-    'opus'     : '󰝚',
+    'opus'     : '',
     'part'     : '',
     'pdf'      : '',
     'php'      : '',
@@ -339,6 +340,15 @@ dir_node_exact_matches = {
     '公共'                           : '',
     '模板'                             : '',
     '視頻'                             : '',
+# Swedish
+    'Skrivbord'                          : '',
+    'Dokument'                        : '',
+    'Hämtningar'                        : '',
+    'Musik'                            : '',
+    'Bilder'                         : '',
+    'Public'                           : '',
+    'Mallar'                        : '',
+    'Video'                           : '',
 }
 
 # Python 2.x-3.4 don't support unpacking syntex `{**dict}`

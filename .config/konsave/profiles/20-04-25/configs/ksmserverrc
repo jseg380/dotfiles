@@ -1,0 +1,15 @@
+[LegacySession: saved at previous logout]
+count=0
+
+[Session: saved at previous logout]
+clientId1=108ee3d873000174505885000000010420005
+clientId2=108ee3d873000174510479800000010420034
+count=2
+program1=/usr/bin/kalendarac
+program2=/usr/bin/anki
+restartCommand1=/usr/bin/kalendarac,-session,108ee3d873000174505885000000010420005_1745110349_519784
+restartCommand2=/usr/bin/anki,-session,108ee3d873000174510479800000010420034_1745104799_668761,-name,anki
+restartStyleHint1=0
+restartStyleHint2=0
+userId1=juanma
+userId2=juanma

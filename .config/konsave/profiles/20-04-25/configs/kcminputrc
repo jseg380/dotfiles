@@ -1,0 +1,4 @@
+[Mouse]
+X11LibInputXAccelProfileFlat=true
+XLbInptPointerAcceleration=-0.4
+cursorTheme=Breeze_Light

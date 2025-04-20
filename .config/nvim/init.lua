@@ -49,7 +49,7 @@ vim.keymap.set('n', '<C-L>', '<C-W>l')
 
 -- Other
 -- vim.opt.wildmode = 'longest,list'
-vim.opt.clipboard = 'unnamedplus'
+vim.opt.clipboard = "unnamedplus"
 vim.opt.cursorline = true
 vim.opt.ttyfast = true
 
@@ -57,3 +57,28 @@ vim.opt.ttyfast = true
 vim.opt.undofile = false
 -- vim.opt.undodir = "$HOME/.cache/nvim/undo-dir"
 -- vim.opt.undolevels = 200
+
+
+-- Custom commands
+vim.api.nvim_create_user_command(
+  "ToggleCC",
+  function()
+    local defaultCC = "80"
+    local pepCC = "120"
+    local currentCC = vim.opt.colorcolumn._value
+
+    -- Toggle between defaultCC and pepCC
+    local newCC = (currentCC == defaultCC) and pepCC or defaultCC
+    vim.opt.colorcolumn = newCC
+  end,
+  { nargs = 0 }
+)
+vim.api.nvim_create_user_command(
+  "SetIndent",
+  function(args)
+    local size = tonumber(args.fargs[1])
+    vim.opt.tabstop = size
+    vim.opt.shiftwidth = size
+  end,
+  { nargs = 1 }
+)

@@ -1,0 +1,4 @@
+[user]
+    name = Juan Segura
+    email = juan380@duck.com
+	signingKey = /home/juanma/.ssh/id_ed25519_personal_asus.pub
