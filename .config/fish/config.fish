@@ -17,7 +17,10 @@ test "$TERM" = "xterm-kitty" && alias ssh="kitty +kitten ssh"
 # alias vagrant-ssh="TERM=xterm-256color vagrant ssh"
 
 #: Substitute coreutils programs by enhanced programs
-command -q bat && alias cat="bat --paging=never"
+if command -q bat 
+    alias cat="bat --paging=never"
+    alias catp="cat --plain"
+end
 command -q eza && alias ls="eza"
 
 #: }}}
@@ -39,19 +42,19 @@ set -gx EDITOR "lvim"
 set -gx VISUAL "$EDITOR"
 set -gx TERMINAL "kitty"
 
+#: PATH
+fish_add_path --path --append --global "$HOME/.local/bin"
+#: Add current working directory to $PATH
+#: NOTE: Replacing '.' by its ASCII value '\x2e' is required!
+if not contains -- . $PATH
+    set -gx PATH \x2e $PATH
+end
+
 #: XDG Base directory
 set -gx XDG_CACHE_HOME "$HOME/.cache"
 set -gx XDG_CONFIG_HOME "$HOME/.config"
 set -gx XDG_DATA_HOME "$HOME/.local/share"
 set -gx XDG_STATE_HOME "$HOME/.local/state"
-
-#: Avoid $HOME pollution
-set -gx CARGO_HOME "$XDG_DATA_HOME/cargo"
-set -gx DOCKER_CONFIG "$XDG_CONFIG_HOME/docker"
-set -gx GNUPGHOME "$XDG_DATA_HOME/gnupg"
-set -gx GTK2_RC_FILES "$XDG_CONFIG_HOME/gtk-2.0/gtkrc"
-set -gx MYSQL_HISTFILE "$XDG_DATA_HOME/mysql_history"
-set -gx NPM_CONFIG_USERCONFIG "$XDG_CONFIG_HOME/npm/npmrc"
 
 #: IME (Input Method Editor)
 set -gx GLFW_IM_MODULE "ibus" 
@@ -59,6 +62,21 @@ set -gx GTK_IM_MODULE "fcitx"
 set -gx QT_IM_MODULE "fcitx"
 set -gx SDL_IM_MODULE "fcitx"
 set -gx XMODIFIERS "@im=fcitx"
+
+#: Avoid $HOME pollution
+set -gx AWS_CONFIG_FILE "$XDG_CONFIG_HOME/aws/config"
+set -gx AWS_SHARED_CREDENTIALS_FILE "$XDG_CONFIG_HOME/aws/credentials"
+set -gx CARGO_HOME "$XDG_DATA_HOME/cargo"
+set -gx CUDA_CACHE_PATH "$XDG_CACHE_HOME/nv"
+set -gx DOCKER_CONFIG "$XDG_CONFIG_HOME/docker"
+set -gx GNUPGHOME "$XDG_DATA_HOME/gnupg"
+set -gx GTK2_RC_FILES "$XDG_CONFIG_HOME/gtk-2.0/gtkrc"
+set -gx MYSQL_HISTFILE "$XDG_DATA_HOME/mysql_history"
+set -gx NPM_CONFIG_USERCONFIG "$XDG_CONFIG_HOME/npm/npmrc"
+set -gx VAGRANT_HOME "$XDG_DATA_HOME/vagrant"
+set -gx WINEPREFIX "$XDG_DATA_HOME/wine"
+set -gx XCURSOR_PATH "/usr/share/icons:$XDG_DATA_HOME/icons"
+set -gx npm_config_cache "$XDG_CACHE_HOME/npm"
 
 #: }}}
 
@@ -93,11 +111,16 @@ end
 
 if command -q pyenv
     #: Add pyenv executable to PATH
-    set -gx PYENV_ROOT $HOME/.pyenv
-    set -gx fish_user_paths $PYENV_ROOT/bin $fish_user_paths
+    set -gx PYENV_ROOT "$XDG_DATA_HOME/pyenv"
+    # fish_add_path --path --append --global $PYENV_ROOT/shims
 
-    #: Load pyenv automatically
+    #: Pyenv loading is usually done eith `pyenv init - fish | source` 
+    #: but it sets the path for shims before the rest •`_´•
+    #: Overriding pyenv init commands to adapt to my needs
     pyenv init - fish | source
+
+    #: Append shims to the end of $PATH
+    fish_add_path --path --move --append "$PYENV_ROOT/shims"
 end
 
 #: }}}
