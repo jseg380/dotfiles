@@ -4,10 +4,10 @@
 
 -- From: https://blog.epheme.re/software/nvim-latex.html
 -- From: https://github.com/lervag/vimtex/blob/master/doc/vimtex.txt#L4671-L4713
-vim.opt_local.foldmethod = "expr"
-vim.opt_local.foldexpr = "vimtex#fold#level(v:lnum)"
-vim.opt_local.foldtext = "vimtex#fold#text()"
-vim.opt_local.foldlevel = 2  -- See content of the sections upon opening
+-- vim.opt_local.foldmethod = "expr"
+-- vim.opt_local.foldexpr = "vimtex#fold#level(v:lnum)"
+-- vim.opt_local.foldtext = "vimtex#fold#text()"
+-- vim.opt_local.foldlevel = 2  -- See content of the sections upon opening
 
 -- Remove color column
 vim.opt_local.colorcolumn = ""

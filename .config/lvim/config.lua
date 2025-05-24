@@ -13,7 +13,7 @@ vim.opt.relativenumber = true     -- Relative line numbers
 vim.opt.termguicolors = true      -- Use GUI colors
 vim.opt.colorcolumn = "80"        -- Marker at 80th char
 vim.opt.clipboard = "unnamedplus" -- For system clipboard
-vim.opt.foldmethod = "expr"
+vim.opt.foldmethod = "manual"
 vim.opt.foldexpr = "nvim_treesitter#foldexpr()"
 vim.opt.foldenable = false
 
@@ -66,6 +66,24 @@ vim.api.nvim_create_user_command(
 --     end,
 --   }
 -- )
+vim.api.nvim_create_autocmd({ "BufNewFile", "BufRead" }, {
+  pattern = "ssh-config",
+  callback = function(args)
+    vim.bo[args.buf].filetype = "sshconfig"
+  end,
+})
+
+vim.api.nvim_create_autocmd({ "BufNewFile", "BufRead" }, {
+  pattern = { "build.sh", "*.subpackage.sh", "PKGBUILD", "*.install",
+      "makepkg.conf", "*.ebuild", "*.eclass", "color.map", "make.conf" },
+  callback = function(args)
+    vim.lsp.start({
+      name = "termux",
+      cmd = { "termux-language-server" }
+    })
+    vim.bo[args.buf].filetype = "bash-build"
+  end,
+})
 
 
 
@@ -148,6 +166,7 @@ lvim.plugins = {
     init = function()
       -- VimTeX configuration goes here
       vim.g.vimtex_view_general_viewer = "okular"
+      vim.g.vimtex_fold_enabled = true
     end
   },
 
@@ -164,6 +183,55 @@ lvim.plugins = {
   {
     "danymat/neogen",
     config = true,
+  },
+
+  -- Session persistence
+  {
+    "folke/persistence.nvim",
+    event = "BufReadPre",  -- load early so it can restore
+    config = function()
+      require("persistence").setup({
+        options = { "buffers", "curdir", "tabpages", "winsize", "help", 
+          "globals", "skiprtp" },
+      })
+    end,
+  },
+
+  -- Library of independent Lua modules for improving overall nvim experience
+  {
+    "echasnovski/mini.nvim",
+    version = "*",
+    config = function ()
+      require("mini.align").setup({
+        -- Module mappings. Use `''` (empty string) to disable one.
+        mappings = {
+          start = 'ga',
+          start_with_preview = 'gA',
+        },
+
+        -- Default options controlling alignment process
+        options = {
+          split_pattern = '',
+          justify_side = 'left',
+          merge_delimiter = '',
+        },
+
+        -- Default steps performing alignment (if `nil`, default is used)
+        steps = {
+          pre_split = {},
+          split = nil,
+          pre_justify = {},
+          justify = nil,
+          pre_merge = {},
+          merge = nil,
+        },
+
+        -- Whether to disable showing non-error feedback
+        -- This also affects (purely informational) helper messages shown after
+        -- idle time if user input is required.
+        silent = false,
+      })
+    end
   },
 
   -- Debugger Adapter Protocol (DAP)
@@ -197,7 +265,8 @@ lvim.plugins = {
       vim.g.copilot_assume_mapped = true
 
       -- Accept suggestion
-      vim.keymap.set('i', '<C-i>', 'copilot#Accept("<CR>")', { expr = true, silent = true })
+      vim.keymap.set('i', '<S-CR>', 'copilot#Accept("<CR>")',
+        { noremap = true, silent = true, expr=true, replace_keycodes = false })
     end,
   }
 }
@@ -208,6 +277,9 @@ lvim.plugins = {
 -------------------------------------------------------------------------------
 
 -- Reference: ~/.local/share/lunarvim/lvim/lua/lvim/keymappings.lua
+
+-- lvim.keys
+
 
 -- WhichKey: default values unassignments
 lvim.builtin.which_key.mappings.b.W = nil
@@ -237,7 +309,13 @@ lvim.builtin.which_key.mappings.T = {
   c = { "<cmd>tabclose<CR>", "Close Tab" },
 }
 
--- Add to which-key descriptions
+lvim.builtin.which_key.mappings.S = {
+  name = "Session",
+  s = { function() require("persistence").load() end, "Restore session (cwd)" },
+  l = { function() require("persistence").load({ last = true }) end, "Restore last session" },
+  d = { function() require("persistence").stop() end, "Disable session saving" },
+}
+
 lvim.builtin.which_key.mappings["C"] = {
   name = "Copilot",
   p = { "<cmd>Copilot panel<CR>", "Open Panel" },
