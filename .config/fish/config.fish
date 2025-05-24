@@ -22,6 +22,7 @@ if command -q bat
     alias catp="cat --plain"
 end
 command -q eza && alias ls="eza"
+command -q delta && alias diff="delta"
 
 #: }}}
 
